@@ -17,7 +17,7 @@
   <header class="site-header">
     <div class="container nav">
       <a href="#home" class="brand">
-        <span class="brand-logo" aria-hidden="true">AI</span>
+        <img src="assets/img/logo.png" alt="Guru Nanak Dev Engineering College - AIML Department Logo" class="brand-logo-img" />
         <div class="brand-text">
           <strong>AIML</strong>
           <small>Department</small>
@@ -61,19 +61,19 @@
         <div class="hero-stats">
           <div class="stat-card">
             <span class="stat" data-counter="420">0</span>
-            <span class="label">Students</span>
+            <span class="label"><i class="fa-solid fa-user-graduate" aria-hidden="true"></i> Students</span>
           </div>
           <div class="stat-card">
             <span class="stat" data-counter="24">0</span>
-            <span class="label">Faculty</span>
+            <span class="label"><i class="fa-solid fa-user-tie" aria-hidden="true"></i> Faculty</span>
           </div>
           <div class="stat-card">
             <span class="stat" data-counter="6">0</span>
-            <span class="label">Labs</span>
+            <span class="label"><i class="fa-solid fa-flask" aria-hidden="true"></i> Labs</span>
           </div>
           <div class="stat-card">
             <span class="stat" data-counter="95">0</span>
-            <span class="label">Placement %</span>
+            <span class="label"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Placement %</span>
           </div>
         </div>
       </div>
@@ -90,6 +90,15 @@
         </div>
       </div>
     </div>
+    <div class="hero-divider" aria-hidden="true">
+      <svg viewBox="0 0 1440 100" preserveAspectRatio="none" focusable="false" role="img">
+        <path d="M0,64 C240,100 480,0 720,32 C960,64 1200,96 1440,48 L1440,100 L0,100 Z" fill="rgba(11,16,32,0.95)"></path>
+      </svg>
+    </div>
+    <a href="#about" class="scroll-cue" aria-label="Scroll to About">
+      <span class="dot"></span>
+      <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+    </a>
   </section>
 
   <!-- About -->
@@ -118,6 +127,58 @@
             <li><i class="fa-solid fa-cloud"></i> Cloud & MLOps Suite</li>
           </ul>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Department Gallery -->
+  <section id="gallery" class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Our Department</h2>
+        <p>Glimpses of our vibrant AIML department, showcasing our facilities, events, and collaborative learning environment.</p>
+      </div>
+      <div class="department-gallery">
+        <div class="gallery-track" aria-live="polite">
+          <div class="gallery-slide active">
+            <img src="assets/img/gallery/department-photo.jpg" alt="AIML Department Overview">
+            <div class="gallery-caption">
+              <h4>AIML Department</h4>
+              <p>State-of-the-art facilities and learning environment</p>
+            </div>
+          </div>
+          <div class="gallery-slide">
+            <img src="assets/img/gallery/group-photo-1.jpg" alt="Department Group Photo">
+            <div class="gallery-caption">
+              <h4>Faculty & Students</h4>
+              <p>Our dedicated team working together for excellence</p>
+            </div>
+          </div>
+          <div class="gallery-slide">
+            <img src="assets/img/gallery/group-photo-2.jpg" alt="Department Group Photo 2">
+            <div class="gallery-caption">
+              <h4>Academic Collaboration</h4>
+              <p>Fostering research and innovation in AI & ML</p>
+            </div>
+          </div>
+          <div class="gallery-slide">
+            <img src="assets/img/gallery/group-photo-3.jpg" alt="Department Group Photo 3">
+            <div class="gallery-caption">
+              <h4>Department Events</h4>
+              <p>Celebrating achievements and milestones</p>
+            </div>
+          </div>
+        </div>
+        <div class="gallery-controls">
+          <button class="gallery-prev" aria-label="Previous image"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="gallery-next" aria-label="Next image"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="gallery-dots">
+          <button class="dot active" data-slide="0" aria-label="Show image 1"></button>
+          <button class="dot" data-slide="1" aria-label="Show image 2"></button>
+          <button class="dot" data-slide="2" aria-label="Show image 3"></button>
+          <button class="dot" data-slide="3" aria-label="Show image 4"></button>
+        </div>
       </div>
     </div>
   </section>
@@ -154,6 +215,47 @@
     </div>
   </section>
 
+  <!-- Leadership -->
+  <section id="leadership" class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Leadership</h2>
+        <p>Our leadership guides the department with vision and dedication.</p>
+      </div>
+      <div class="faculty-grid">
+        <!-- Place leader photos in assets/img/leadership/ and update file names as needed -->
+        <article class="faculty-card">
+          <img src="assets/img/leadership/chairman.jpg" alt="Chairman portrait">
+          <div class="info">
+            <h3>Dr. Sardar Balbir Singh</h3>
+            <p class="role">Chairman</p>
+          </div>
+        </article>
+        <article class="faculty-card">
+          <img src="assets/img/leadership/vice-chairman.jpg" alt="Vice Chairperson portrait">
+          <div class="info">
+            <h3>Dr. Reshma Kaur</h3>
+            <p class="role">Vice Chairperson</p>
+          </div>
+        </article>
+        <article class="faculty-card">
+          <img src="assets/img/leadership/principal2.jpg" alt="Principal portrait">
+          <div class="info">
+            <h3>Dr. Veena S. Soraganvi</h3>
+            <p class="role">Principal</p>
+          </div>
+        </article>
+        <article class="faculty-card">
+          <img src="assets/img/leadership/director.jpg" alt="Director">
+          <div class="info">
+            <h3>Col. Ravideep Singh</h3>
+            <p class="role">Director Administration</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <!-- Faculty -->
   <section id="faculty" class="section">
     <div class="container">
@@ -162,37 +264,54 @@
         <p>Meet our experienced professors, associate and assistant professors guiding students towards excellence.</p>
       </div>
       <div class="faculty-grid">
-        <!-- Sample cards; replace with real data later -->
+        <!-- Temporary placeholder photos from Unsplash. Replace src with your real images anytime. -->
         <article class="faculty-card">
-          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop" alt="HOD portrait">
+          <img src="assets/img/faculty/hod-aiml.jpg" alt="Dr. Dayanand portrait">
           <div class="info">
-            <h3>Dr. Ayesha Rahman</h3>
-            <p class="role">Professor & HOD, AIML</p>
-            <p class="tags"><span>Deep Learning</span><span>Ethics</span></p>
+            <h3>Dr. Dayanand</h3>
+            <p class="role">Head of Department (HOD)</p>
           </div>
         </article>
         <article class="faculty-card">
-          <img src="https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=800&auto=format&fit=crop" alt="Professor portrait">
+          <img src="assets/img/faculty/jasmineet-kaur.jpg" alt="Dr. Jasmineet Kaur portrait">
           <div class="info">
-            <h3>Dr. Rohan Kapoor</h3>
-            <p class="role">Associate Professor</p>
-            <p class="tags"><span>NLP</span><span>IR</span></p>
-          </div>
-        </article>
-        <article class="faculty-card">
-          <img src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=800&auto=format&fit=crop" alt="Professor portrait">
-          <div class="info">
-            <h3>Prof. Meera Joshi</h3>
+            <h3>Dr. Jasmineet Kaur</h3>
             <p class="role">Assistant Professor</p>
-            <p class="tags"><span>CV</span><span>Data Mining</span></p>
           </div>
         </article>
         <article class="faculty-card">
-          <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=800&auto=format&fit=crop" alt="Professor portrait">
+          <img src="assets/img/faculty/netravati-sawale.jpg" alt="Prof. Netravati Sawale portrait">
           <div class="info">
-            <h3>Prof. S. Pratap</h3>
+            <h3>Prof. Netravati Sawale</h3>
             <p class="role">Assistant Professor</p>
-            <p class="tags"><span>Reinforcement Learning</span><span>MLOps</span></p>
+          </div>
+        </article>
+        <article class="faculty-card">
+          <img src="https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?q=80&w=800&auto=format&fit=crop" alt="Prof. Rony Preetam portrait">
+          <div class="info">
+            <h3>Prof. Rony Preetam</h3>
+            <p class="role">Assistant Professor</p>
+          </div>
+        </article>
+        <article class="faculty-card">
+          <img src="https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=800&auto=format&fit=crop" alt="Prof. Shruti Patil portrait">
+          <div class="info">
+            <h3>Prof. Shruti Patil</h3>
+            <p class="role">Assistant Professor</p>
+          </div>
+        </article>
+        <article class="faculty-card">
+          <img src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=800&auto=format&fit=crop" alt="Prof. Ashwini Biradar portrait">
+          <div class="info">
+            <h3>Prof. Ashwini Biradar</h3>
+            <p class="role">Assistant Professor</p>
+          </div>
+        </article>
+        <article class="faculty-card">
+          <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop" alt="Prof. Nasreen Kausar portrait">
+          <div class="info">
+            <h3>Prof. Nasreen Kausar</h3>
+            <p class="role">Assistant Professor</p>
           </div>
         </article>
       </div>

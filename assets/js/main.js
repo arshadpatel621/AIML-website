@@ -103,6 +103,76 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
   update();
 })();
 
+// Department Gallery (animated slideshow)
+(function departmentGallery() {
+  const track = qs('.gallery-track');
+  const slides = qsa('.gallery-slide', track);
+  const prevBtn = qs('.gallery-prev');
+  const nextBtn = qs('.gallery-next');
+  const dots = qsa('.gallery-dots .dot');
+  
+  if (!track || !slides.length) return;
+  
+  let currentSlide = 0;
+  let isAnimating = false;
+  
+  const updateSlide = (newIndex) => {
+    if (isAnimating || newIndex === currentSlide) return;
+    
+    isAnimating = true;
+    
+    // Update active slide
+    slides[currentSlide].classList.remove('active');
+    slides[newIndex].classList.add('active');
+    
+    // Update active dot
+    dots[currentSlide]?.classList.remove('active');
+    dots[newIndex]?.classList.add('active');
+    
+    currentSlide = newIndex;
+    
+    // Reset animation lock after transition
+    setTimeout(() => { isAnimating = false; }, 600);
+  };
+  
+  const nextSlide = () => {
+    const next = (currentSlide + 1) % slides.length;
+    updateSlide(next);
+  };
+  
+  const prevSlide = () => {
+    const prev = currentSlide === 0 ? slides.length - 1 : currentSlide - 1;
+    updateSlide(prev);
+  };
+  
+  // Button controls
+  nextBtn?.addEventListener('click', nextSlide);
+  prevBtn?.addEventListener('click', prevSlide);
+  
+  // Dot controls
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => updateSlide(index));
+  });
+  
+  // Auto-advance every 5 seconds
+  let autoSlide = setInterval(nextSlide, 5000);
+  
+  // Pause auto-advance on hover
+  track.addEventListener('mouseenter', () => {
+    clearInterval(autoSlide);
+  });
+  
+  track.addEventListener('mouseleave', () => {
+    autoSlide = setInterval(nextSlide, 5000);
+  });
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') prevSlide();
+    if (e.key === 'ArrowRight') nextSlide();
+  });
+})();
+
 // GSAP Animations
 (function animations() {
   if (!(window.gsap && window.ScrollTrigger)) return;
@@ -114,6 +184,8 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
   gs.from('.hero-subtitle', { y: 20, opacity: 0, duration: 0.8, delay: 0.1, ease: 'power3.out' });
   gs.from('.hero-cta', { y: 16, opacity: 0, duration: 0.7, delay: 0.2, ease: 'power3.out' });
   gs.from('.hero-card', { y: 24, opacity: 0, duration: 0.8, delay: 0.15, ease: 'power3.out' });
+  gs.from('.stat-card', { y: 16, opacity: 0, duration: 0.6, delay: 0.25, stagger: 0.08, ease: 'power3.out' });
+  gs.to('.floating-badges .badge', { y: -6, repeat: -1, yoyo: true, ease: 'sine.inOut', duration: 2.0, stagger: 0.15 });
 
   // Parallax blobs
   const blobs = qsa('.blob');
