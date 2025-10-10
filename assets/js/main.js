@@ -200,9 +200,38 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
       scrollTrigger: { trigger: sec, start: 'top 80%' },
       y: 16, opacity: 0, duration: 0.6, stagger: 0.08, ease: 'power2.out'
     });
-    gs.from(sec.querySelectorAll('.card, .faculty-card, .activity-card'), {
-      scrollTrigger: { trigger: sec, start: 'top 75%' },
-      y: 22, opacity: 0, duration: 0.6, stagger: 0.06, ease: 'power2.out'
-    });
+    // Avoid double-animating Mission & Vision cards by excluding them here
+    const cardSelector = sec.id === 'mission' ? '.faculty-card, .activity-card' : '.card, .faculty-card, .activity-card';
+    const cardEls = sec.querySelectorAll(cardSelector);
+    if (cardEls.length) {
+      gs.from(cardEls, {
+        scrollTrigger: { trigger: sec, start: 'top 75%' },
+        y: 22, opacity: 0, duration: 0.6, stagger: 0.06, ease: 'power2.out'
+      });
+    }
   });
+
+  // Mission & Vision specific reveals
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceMotion) {
+    gs.from('#mission .mv-card', {
+      scrollTrigger: { trigger: '#mission', start: 'top 78%' },
+      y: 30,
+      opacity: 0,
+      rotateX: 8,
+      transformPerspective: 800,
+      duration: 0.7,
+      stagger: 0.08,
+      ease: 'power3.out'
+    });
+    gs.from('#mission h3.mv-title', {
+      scrollTrigger: { trigger: '#mission', start: 'top 78%' },
+      y: 10,
+      opacity: 0,
+      duration: 0.5,
+      stagger: 0.06,
+      delay: 0.1,
+      ease: 'power2.out'
+    });
+  }
 })();
