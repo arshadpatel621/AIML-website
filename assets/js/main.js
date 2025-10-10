@@ -173,6 +173,81 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
   });
 })();
 
+// Stack uploads: CSV/JSON render
+(function stackUploads() {
+  const boxes = qsa('.stack-box');
+  if (!boxes.length) return;
+
+  const parseCSV = (text) => {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    return lines.map(line => line.split(',').map(cell => cell.trim()));
+  };
+
+  const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+
+  const renderTable = (rows, container) => {
+    if (!rows.length) { container.textContent = 'No rows found.'; return; }
+    const header = rows[0];
+    const body = rows.slice(1);
+    const thead = `<thead><tr>${header.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>`;
+    const tbody = `<tbody>${body.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+    container.innerHTML = `<table>${thead}${tbody}</table>`;
+  };
+
+  const renderJSON = (data, container) => {
+    try {
+      if (Array.isArray(data) && data.length && typeof data[0] === 'object' && !Array.isArray(data[0])) {
+        const keys = Array.from(new Set(data.flatMap(o => Object.keys(o))));
+        const rows = [keys, ...data.map(o => keys.map(k => o[k] ?? ''))];
+        renderTable(rows, container);
+        return;
+      }
+      if (Array.isArray(data)) {
+        const rows = [['Value'], ...data.map(v => [typeof v === 'object' ? JSON.stringify(v) : v])];
+        renderTable(rows, container);
+        return;
+      }
+      if (typeof data === 'object' && data) {
+        const rows = [['Key','Value'], ...Object.entries(data).map(([k, v]) => [k, typeof v === 'object' ? JSON.stringify(v) : v])];
+        renderTable(rows, container);
+        return;
+      }
+      container.textContent = String(data);
+    } catch (e) {
+      container.textContent = 'Unable to render JSON data.';
+    }
+  };
+
+  boxes.forEach((box) => {
+    const input = qs('input[type="file"]', box);
+    const content = qs('.stack-content', box);
+    if (!input || !content) return;
+
+    input.addEventListener('change', async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      content.textContent = 'Loading...';
+      try {
+        const text = await file.text();
+        const name = file.name.toLowerCase();
+        if (name.endsWith('.csv')) {
+          const rows = parseCSV(text);
+          renderTable(rows, content);
+        } else if (name.endsWith('.json')) {
+          const data = JSON.parse(text);
+          renderJSON(data, content);
+        } else {
+          content.textContent = 'Unsupported file format. Please upload CSV or JSON.';
+        }
+      } catch (e) {
+        content.textContent = 'Failed to read or parse file.';
+      } finally {
+        input.value = '';
+      }
+    });
+  });
+})();
+
 // GSAP Animations
 (function animations() {
   if (!(window.gsap && window.ScrollTrigger)) return;
