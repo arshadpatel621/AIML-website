@@ -173,6 +173,121 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
   });
 })();
 
+// Stack uploads: CSV/JSON render
+(function stackUploads() {
+  const boxes = qsa('.stack-box');
+  if (!boxes.length) return;
+
+  const parseCSV = (text) => {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    return lines.map(line => line.split(',').map(cell => cell.trim()));
+  };
+
+  const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+
+  const renderTable = (rows, container) => {
+    if (!rows.length) { container.textContent = 'No rows found.'; return; }
+    const header = rows[0];
+    const body = rows.slice(1);
+    const thead = `<thead><tr>${header.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>`;
+    const tbody = `<tbody>${body.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+    container.innerHTML = `<table>${thead}${tbody}</table>`;
+  };
+
+  const renderJSON = (data, container) => {
+    try {
+      if (Array.isArray(data) && data.length && typeof data[0] === 'object' && !Array.isArray(data[0])) {
+        const keys = Array.from(new Set(data.flatMap(o => Object.keys(o))));
+        const rows = [keys, ...data.map(o => keys.map(k => o[k] ?? ''))];
+        renderTable(rows, container);
+        return;
+      }
+      if (Array.isArray(data)) {
+        const rows = [['Value'], ...data.map(v => [typeof v === 'object' ? JSON.stringify(v) : v])];
+        renderTable(rows, container);
+        return;
+      }
+      if (typeof data === 'object' && data) {
+        const rows = [['Key','Value'], ...Object.entries(data).map(([k, v]) => [k, typeof v === 'object' ? JSON.stringify(v) : v])];
+        renderTable(rows, container);
+        return;
+      }
+      container.textContent = String(data);
+    } catch (e) {
+      container.textContent = 'Unable to render JSON data.';
+    }
+  };
+
+  boxes.forEach((box) => {
+    const input = qs('input[type="file"]', box);
+    const content = qs('.stack-content', box);
+    if (!input || !content) return;
+
+    input.addEventListener('change', async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      content.textContent = 'Loading...';
+      try {
+        const text = await file.text();
+        const name = file.name.toLowerCase();
+        if (name.endsWith('.csv')) {
+          const rows = parseCSV(text);
+          renderTable(rows, content);
+        } else if (name.endsWith('.json')) {
+          const data = JSON.parse(text);
+          renderJSON(data, content);
+        } else {
+          content.textContent = 'Unsupported file format. Please upload CSV or JSON.';
+        }
+      } catch (e) {
+        content.textContent = 'Failed to read or parse file.';
+      } finally {
+        input.value = '';
+      }
+    });
+  });
+})();
+
+// About Us Typing Animation
+(function aboutUsAnimations() {
+  const taglineText = qs('#tagline-text');
+  const cursor = qs('#typing-cursor');
+  
+  if (!taglineText || !cursor) return;
+  
+  const text = taglineText.textContent;
+  taglineText.textContent = '';
+  
+  let index = 0;
+  const typeSpeed = 50; // milliseconds per character
+  
+  function typeWriter() {
+    if (index < text.length) {
+      taglineText.textContent += text.charAt(index);
+      index++;
+      setTimeout(typeWriter, typeSpeed);
+    } else {
+      // Start cursor blinking after typing is complete
+      cursor.style.opacity = '1';
+    }
+  }
+  
+  // Start typing animation when About section comes into view
+  const aboutSection = qs('.about-section');
+  if (aboutSection) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setTimeout(typeWriter, 500); // Small delay before starting
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    
+    observer.observe(aboutSection);
+  }
+})();
+
 // GSAP Animations
 (function animations() {
   if (!(window.gsap && window.ScrollTrigger)) return;
@@ -211,6 +326,28 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
     }
   });
 
+<<<<<<< HEAD
+=======
+  // About Us section animations
+  const aboutSection = qs('.about-section');
+  if (aboutSection) {
+    gs.from('.about-title', {
+      scrollTrigger: { trigger: aboutSection, start: 'top 80%' },
+      y: 30, opacity: 0, duration: 0.8, ease: 'power3.out'
+    });
+    
+    gs.from('.about-intro', {
+      scrollTrigger: { trigger: aboutSection, start: 'top 75%' },
+      y: 20, opacity: 0, duration: 0.7, delay: 0.2, ease: 'power2.out'
+    });
+    
+    gs.from('.highlight-card', {
+      scrollTrigger: { trigger: aboutSection, start: 'top 70%' },
+      y: 30, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power2.out'
+    });
+  }
+
+>>>>>>> origin/mahek123
   // Mission & Vision specific reveals
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!reduceMotion) {
