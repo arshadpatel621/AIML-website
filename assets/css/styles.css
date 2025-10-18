@@ -489,8 +489,6 @@ input:focus, textarea:focus { border-color: var(--ring); box-shadow: 0 0 0 4px r
   }
 }
 
-<<<<<<< HEAD
-=======
 /* About Us Section */
 .about-section {
   position: relative;
@@ -703,7 +701,6 @@ input:focus, textarea:focus { border-color: var(--ring); box-shadow: 0 0 0 4px r
   color: var(--muted);
 }
 
->>>>>>> origin/mahek123
 /* Mission & Vision enhancements */
 #mission .mv-card {
   position: relative;

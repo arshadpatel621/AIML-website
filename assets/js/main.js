@@ -326,8 +326,6 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
     }
   });
 
-<<<<<<< HEAD
-=======
   // About Us section animations
   const aboutSection = qs('.about-section');
   if (aboutSection) {
@@ -347,7 +345,6 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
     });
   }
 
->>>>>>> origin/mahek123
   // Mission & Vision specific reveals
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!reduceMotion) {
