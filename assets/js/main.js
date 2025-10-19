@@ -5,6 +5,56 @@
 const qs = (s, el = document) => el.querySelector(s);
 const qsa = (s, el = document) => [...el.querySelectorAll(s)];
 
+// Enhanced sticky navigation
+(function enhancedStickyNav() {
+  const header = qs('.site-header');
+  if (!header) return;
+  
+  let lastScrollTop = 0;
+  let isNavVisible = true;
+  const scrollThreshold = 5; // Minimum scroll distance to trigger hide/show
+  
+  const updateNavVisibility = () => {
+    const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollDiff = Math.abs(currentScrollTop - lastScrollTop);
+    
+    // Only update if scroll difference is significant enough
+    if (scrollDiff < scrollThreshold) return;
+    
+    // Always show nav when at top of page
+    if (currentScrollTop <= 80) {
+      header.style.transform = 'translateY(0)';
+      header.style.opacity = '1';
+      isNavVisible = true;
+    }
+    // Show nav immediately when scrolling up (any amount)
+    else if (currentScrollTop < lastScrollTop) {
+      header.style.transform = 'translateY(0)';
+      header.style.opacity = '1';
+      isNavVisible = true;
+    }
+    // Hide nav when scrolling down (after some distance)
+    else if (currentScrollTop > lastScrollTop && currentScrollTop > 150) {
+      header.style.transform = 'translateY(-100%)';
+      header.style.opacity = '0.7';
+      isNavVisible = false;
+    }
+    
+    lastScrollTop = currentScrollTop;
+  };
+  
+  let ticking = false;
+  const requestTick = () => {
+    if (!ticking) {
+      requestAnimationFrame(updateNavVisibility);
+      ticking = true;
+      setTimeout(() => { ticking = false; }, 10);
+    }
+  };
+  
+  window.addEventListener('scroll', requestTick, { passive: true });
+});
+
 // Mobile nav toggle
 (function mobileNav() {
   const toggle = qs('.nav-toggle');
