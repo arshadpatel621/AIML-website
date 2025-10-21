@@ -14,6 +14,47 @@
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
+  <!-- Welcome Popup -->
+  <div id="welcomePopup" class="welcome-popup">
+    <div class="popup-overlay"></div>
+    <div class="popup-content">
+      <button class="popup-close" id="closePopup" aria-label="Close welcome popup">
+        <i class="fa-solid fa-times"></i>
+      </button>
+      <div class="popup-header">
+        <img src="guru.jpg" alt="AIML Department Logo" class="popup-logo">
+        <h2>Welcome to AIML Department!</h2>
+        <p class="popup-subtitle">Guru Nanak Dev Engineering College, Bidar</p>
+      </div>
+      <div class="popup-body">
+        <div class="welcome-message">
+          <h3>🎉 Empowering Intelligence Through Innovation</h3>
+          <p>Welcome to the Department of Artificial Intelligence & Machine Learning! We're excited to have you explore our world-class programs, cutting-edge research, and innovative learning environment.</p>
+          
+          <div class="popup-highlights">
+            <div class="highlight-item">
+              <i class="fa-solid fa-user-graduate"></i>
+              <span><strong>420+</strong> Students</span>
+            </div>
+            <div class="highlight-item">
+              <i class="fa-solid fa-user-tie"></i>
+              <span><strong>24+</strong> Expert Faculty</span>
+            </div>
+            <div class="highlight-item">
+              <i class="fa-solid fa-chart-line"></i>
+              <span><strong>95%</strong> Placement Rate</span>
+            </div>
+          </div>
+          
+          <p class="popup-cta-text">Ready to discover the future of AI & ML?</p>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn btn-primary" id="exploreBtn">Explore Department</button>
+        <button class="btn btn-ghost" id="closePopupBtn">Maybe Later</button>
+      </div>
+    </div>
+  </div>
   <!-- Navigation -->
   <header class="site-header">
     <div class="container nav">
@@ -357,6 +398,13 @@
             <p class="role">Assistant Professor</p>
           </div>
         </article>
+         <article class="faculty-card">
+          <img src="" alt="Prof. madam portrait">
+          <div class="info">
+            <h3>Prof. madam</h3>
+            <p class="role">Assistant Professor</p>
+          </div>
+        </article>
       </div>
     </div>
   </section>
@@ -441,19 +489,39 @@ NIKITA DANADIN
       <div class="stack-grid">
         <article class="stack-box">
           <header><h3><a href="aiml2021_22.pdf" target="_blank" rel="noopener noreferrer">First Year</a></h3></header>
-          <div class="stack-content" aria-live="polite"><p>AIML Batch 2021_22</p></div>
+          <div class="stack-content" aria-live="polite">
+            <p>AIML Batch 2021_22</p>
+            <a href="aiml2021_22.pdf" download="AIML_Students_2021-22.pdf" class="download-btn">
+              <i class="fa-solid fa-download"></i> Download
+            </a>
+          </div>
         </article>
         <article class="stack-box">
           <header><h3><a href="aiml2022_23.pdf" target="_blank" rel="noopener noreferrer">Second Year</a></h3></header>
-          <div class="stack-content" aria-live="polite"><p>AIML Batch 2022_23</p></div>
+          <div class="stack-content" aria-live="polite">
+            <p>AIML Batch 2022_23</p>
+            <a href="aiml2022_23.pdf" download="AIML_Students_2022-23.pdf" class="download-btn">
+              <i class="fa-solid fa-download"></i> Download
+            </a>
+          </div>
         </article>
         <article class="stack-box">
           <header><h3><a href="aiml2023_24.pdf" target="_blank" rel="noopener noreferrer">Third Year</a></h3></header>
-          <div class="stack-content" aria-live="polite"><p>AIML Batch 2023_24</p></div>
+          <div class="stack-content" aria-live="polite">
+            <p>AIML Batch 2023_24</p>
+            <a href="aiml2023_24.pdf" download="AIML_Students_2023-24.pdf" class="download-btn">
+              <i class="fa-solid fa-download"></i> Download
+            </a>
+          </div>
         </article>
         <article class="stack-box">
           <header><h3><a href="aiml2024_25.pdf" target="_blank" rel="noopener noreferrer">Fourth Year</a></h3></header>
-          <div class="stack-content" aria-live="polite"><p>AIML Batch 2024_25</p></div>
+          <div class="stack-content" aria-live="polite">
+            <p>AIML Batch 2024_25</p>
+            <a href="aiml2024_25.pdf" download="AIML_Students_2024-25.pdf" class="download-btn">
+              <i class="fa-solid fa-download"></i> Download
+            </a>
+          </div>
         </article>
       </div>
     </div>

@@ -97,6 +97,88 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
   if (y) y.textContent = new Date().getFullYear();
 })();
 
+// Welcome Popup
+(function welcomePopup() {
+  const popup = qs('#welcomePopup');
+  const closeBtn = qs('#closePopup');
+  const closeBtnAlt = qs('#closePopupBtn');
+  const exploreBtn = qs('#exploreBtn');
+  const overlay = qs('.popup-overlay');
+  
+  if (!popup) return;
+  
+  // Check if user has seen popup before (localStorage)
+  const hasSeenPopup = localStorage.getItem('aiml-welcome-popup-seen');
+  
+  const showPopup = () => {
+    document.body.classList.add('popup-open');
+    popup.classList.add('show');
+    
+    // Focus management for accessibility
+    const firstFocusable = popup.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (firstFocusable) {
+      setTimeout(() => firstFocusable.focus(), 300);
+    }
+  };
+  
+  const hidePopup = () => {
+    popup.classList.remove('show');
+    document.body.classList.remove('popup-open');
+    
+    // Mark as seen in localStorage
+    localStorage.setItem('aiml-welcome-popup-seen', 'true');
+    
+    // Return focus to body
+    document.body.focus();
+  };
+  
+  const exploreAndHide = () => {
+    hidePopup();
+    // Smooth scroll to about section after a brief delay
+    setTimeout(() => {
+      const aboutSection = qs('#about');
+      if (aboutSection) {
+        const y = aboutSection.getBoundingClientRect().top + window.scrollY - 64;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 300);
+  };
+  
+  // Event listeners
+  closeBtn?.addEventListener('click', hidePopup);
+  closeBtnAlt?.addEventListener('click', hidePopup);
+  exploreBtn?.addEventListener('click', exploreAndHide);
+  overlay?.addEventListener('click', hidePopup);
+  
+  // Keyboard support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && popup.classList.contains('show')) {
+      hidePopup();
+    }
+  });
+  
+  // Show popup every time (for testing)
+  // Remove the condition to show popup on every visit
+  setTimeout(() => {
+    showPopup();
+  }, 1000); // Show after 1 second
+  
+  // Optional: Show popup again after 30 days
+  const lastShown = localStorage.getItem('aiml-welcome-popup-last-shown');
+  const now = Date.now();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+  
+  if (lastShown && (now - parseInt(lastShown)) > thirtyDays) {
+    localStorage.removeItem('aiml-welcome-popup-seen');
+    localStorage.setItem('aiml-welcome-popup-last-shown', now.toString());
+  }
+  
+  // Update last shown time when popup is displayed
+  if (!hasSeenPopup) {
+    localStorage.setItem('aiml-welcome-popup-last-shown', now.toString());
+  }
+})();
+
 // Counters in hero
 (function counters() {
   const counters = qsa('.stat[data-counter]');
