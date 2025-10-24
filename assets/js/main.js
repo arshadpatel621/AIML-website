@@ -5,6 +5,33 @@
 const qs = (s, el = document) => el.querySelector(s);
 const qsa = (s, el = document) => [...el.querySelectorAll(s)];
 
+// Page Loader
+(function pageLoader() {
+  const loader = qs('#pageLoader');
+  if (!loader) return;
+  
+  // Hide loader once page is loaded
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      loader.classList.add('fade-out');
+      // Remove from DOM after animation
+      setTimeout(() => {
+        loader.remove();
+      }, 500);
+    }, 800); // Show loader for at least 800ms
+  });
+  
+  // Also hide loader if page takes too long (fallback)
+  setTimeout(() => {
+    if (loader) {
+      loader.classList.add('fade-out');
+      setTimeout(() => {
+        loader.remove();
+      }, 500);
+    }
+  }, 3000); // Max 3 seconds
+})();
+
 // Enhanced sticky navigation
 (function enhancedStickyNav() {
   const header = qs('.site-header');
@@ -97,6 +124,70 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
   if (y) y.textContent = new Date().getFullYear();
 })();
 
+// Floating CTA
+(function floatingCTA() {
+  const floatingCta = qs('#floatingCta');
+  if (!floatingCta) return;
+  
+  let lastScrollTop = 0;
+  const showThreshold = 500; // Show after scrolling 500px
+  
+  const updateCTAVisibility = () => {
+    const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Show CTA after scrolling past threshold and when scrolling up
+    if (currentScrollTop > showThreshold) {
+      if (currentScrollTop < lastScrollTop || currentScrollTop > window.innerHeight) {
+        floatingCta.classList.add('show');
+      }
+    } else {
+      floatingCta.classList.remove('show');
+    }
+    
+    // Hide when near bottom of page
+    if ((window.innerHeight + currentScrollTop) >= document.body.offsetHeight - 200) {
+      floatingCta.classList.remove('show');
+    }
+    
+    lastScrollTop = currentScrollTop;
+  };
+  
+  let ticking = false;
+  const requestTick = () => {
+    if (!ticking) {
+      requestAnimationFrame(updateCTAVisibility);
+      ticking = true;
+      setTimeout(() => { ticking = false; }, 10);
+    }
+  };
+  
+  window.addEventListener('scroll', requestTick, { passive: true });
+})();
+
+// Enhanced card hover effects
+(function cardEffects() {
+  const cards = qsa('.card, .faculty-card, .activity-card');
+  
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', function(e) {
+      // Add subtle rotation based on mouse position
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = (y - centerY) / 10;
+      const rotateY = (centerX - x) / 10;
+      
+      this.style.transform = `translateY(-8px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) rotateX(0) rotateY(0)';
+    });
+  });
+})();
+
 // Welcome Popup
 (function welcomePopup() {
   const popup = qs('#welcomePopup');
@@ -179,38 +270,83 @@ const qsa = (s, el = document) => [...el.querySelectorAll(s)];
   }
 })();
 
-// Counters in hero
-(function counters() {
+// Enhanced Counters with Progress Bars in hero
+(function enhancedCounters() {
   const counters = qsa('.stat[data-counter]');
+  const progressBars = qsa('.stat-progress-bar[data-progress]');
   if (!counters.length) return;
+  
   const animateCounter = (el) => {
     const end = Number(el.getAttribute('data-counter') || '0');
-    const dur = 1.2; // seconds
+    const dur = 2.5; // seconds
     let startTs;
     const step = (ts) => {
       if (!startTs) startTs = ts;
       const p = Math.min((ts - startTs) / (dur * 1000), 1);
-      const val = Math.floor(end * (0.2 + 0.8 * p * p));
+      const easeOutQuart = 1 - Math.pow(1 - p, 4); // Better easing
+      const val = Math.floor(end * easeOutQuart);
       el.textContent = String(val);
       if (p < 1) requestAnimationFrame(step);
       else el.textContent = String(end);
     };
     requestAnimationFrame(step);
   };
-  // Trigger when hero is visible
+  
+  const animateProgressBar = (el) => {
+    const progress = Number(el.getAttribute('data-progress') || '0');
+    setTimeout(() => {
+      el.style.width = progress + '%';
+    }, 200); // Small delay for better visual effect
+  };
+  
+  // Trigger when hero stats are visible
   let triggered = false;
   const onScroll = () => {
     const hero = qs('.hero-stats');
     if (!hero || triggered) return;
     const rect = hero.getBoundingClientRect();
-    if (rect.top < window.innerHeight) {
+    if (rect.top < window.innerHeight * 0.8) {
       triggered = true;
+      
+      // Animate counters
       counters.forEach(animateCounter);
+      
+      // Animate progress bars
+      progressBars.forEach(animateProgressBar);
+      
+      // Add entrance animations to stat cards
+      qsa('.stat-card').forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('stat-animate');
+      });
+      
       window.removeEventListener('scroll', onScroll);
     }
   };
+  
   window.addEventListener('scroll', onScroll);
   onScroll();
+})();
+
+// Scroll-triggered animations for sections
+(function scrollAnimations() {
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in');
+      }
+    });
+  }, observerOptions);
+  
+  // Observe all sections and cards
+  qsa('.section, .card, .faculty-card, .activity-card').forEach(el => {
+    observer.observe(el);
+  });
 })();
 
 // Toppers slider (simple)

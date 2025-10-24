@@ -14,6 +14,13 @@
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
+  <!-- Page Loader -->
+  <div class="page-loader" id="pageLoader">
+    <div class="loader-content">
+      <div class="loader-spinner"></div>
+      <div class="loader-text">Loading AIML Department...</div>
+    </div>
+  </div>
   <!-- Welcome Popup -->
   <div id="welcomePopup" class="welcome-popup">
     <div class="popup-overlay"></div>
@@ -81,10 +88,11 @@
   </header>
 
   <!-- Hero -->
-  <section id="home" class="hero">
+  <section id="home" class="hero" style="background-image: url('assets/background.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
     <div class="hero-bg">
       <div class="blob b1"></div>
       <div class="blob b2"></div>
+      <div class="blob b3"></div>
       <div class="grid-overlay" aria-hidden="true"></div>
     </div>
     <div class="container hero-inner">
@@ -102,18 +110,30 @@
         <div class="hero-stats">
           <div class="stat-card">
             <span class="stat" data-counter="420">0</span>
+            <div class="stat-progress">
+              <div class="stat-progress-bar" data-progress="85"></div>
+            </div>
             <span class="label"><i class="fa-solid fa-user-graduate" aria-hidden="true"></i> Students</span>
           </div>
           <div class="stat-card">
             <span class="stat" data-counter="24">0</span>
+            <div class="stat-progress">
+              <div class="stat-progress-bar" data-progress="75"></div>
+            </div>
             <span class="label"><i class="fa-solid fa-user-tie" aria-hidden="true"></i> Faculty</span>
           </div>
           <div class="stat-card">
             <span class="stat" data-counter="6">0</span>
+            <div class="stat-progress">
+              <div class="stat-progress-bar" data-progress="60"></div>
+            </div>
             <span class="label"><i class="fa-solid fa-flask" aria-hidden="true"></i> Labs</span>
           </div>
           <div class="stat-card">
             <span class="stat" data-counter="95">0</span>
+            <div class="stat-progress">
+              <div class="stat-progress-bar" data-progress="95"></div>
+            </div>
             <span class="label"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Placement %</span>
           </div>
         </div>
@@ -619,6 +639,14 @@ principal@gndecb.ac.in</li>
       </form>
     </div>
   </section>
+
+  <!-- Floating CTA -->
+  <div class="floating-cta" id="floatingCta">
+    <a href="#contact" class="btn btn-primary">
+      <i class="fa-solid fa-message"></i>
+      Get in Touch
+    </a>
+  </div>
 
   <footer class="site-footer">
     <div class="container footer">
