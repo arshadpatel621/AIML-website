@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - AIML Department</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <img src="../guru.jpg" alt="Logo" class="sidebar-logo">
+      <h2>AIML Admin</h2>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#dashboard" class="nav-item active" data-section="dashboard">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#faculty" class="nav-item" data-section="faculty">
+        <i class="fa-solid fa-chalkboard-user"></i>
+        <span>Faculty</span>
+      </a>
+      <a href="#students" class="nav-item" data-section="students">
+        <i class="fa-solid fa-user-graduate"></i>
+        <span>Students</span>
+      </a>
+      <a href="#activities" class="nav-item" data-section="activities">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Activities</span>
+      </a>
+      <a href="#achievements" class="nav-item" data-section="achievements">
+        <i class="fa-solid fa-trophy"></i>
+        <span>Achievements</span>
+      </a>
+      <a href="#gallery" class="nav-item" data-section="gallery">
+        <i class="fa-solid fa-images"></i>
+        <span>Gallery</span>
+      </a>
+      <a href="#content" class="nav-item" data-section="content">
+        <i class="fa-solid fa-file-lines"></i>
+        <span>Content</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="top-header">
+      <button class="menu-toggle" id="menuToggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="header-actions">
+        <button class="header-btn" id="viewWebsite" title="View Website">
+          <i class="fa-solid fa-globe"></i>
+        </button>
+        <div class="admin-profile">
+          <img src="../guru.jpg" alt="Admin">
+          <span id="adminName">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Section -->
+    <section id="dashboardSection" class="content-section active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <div class="stat-info">
+            <h3>420</h3>
+            <p>Total Students</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <i class="fa-solid fa-chalkboard-user"></i>
+          </div>
+          <div class="stat-info">
+            <h3>24</h3>
+            <p>Faculty Members</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+          <div class="stat-info">
+            <h3>15</h3>
+            <p>Activities</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div class="stat-info">
+            <h3>8</h3>
+            <p>Achievements</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <h3>Recent Activities</h3>
+          <div class="activity-list">
+            <div class="activity-item">
+              <i class="fa-solid fa-plus-circle"></i>
+              <span>New faculty member added</span>
+              <small>2 hours ago</small>
+            </div>
+            <div class="activity-item">
+              <i class="fa-solid fa-edit"></i>
+              <span>Content updated</span>
+              <small>5 hours ago</small>
+            </div>
+            <div class="activity-item">
+              <i class="fa-solid fa-image"></i>
+              <span>Gallery image uploaded</span>
+              <small>1 day ago</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions">
+            <button class="action-btn" onclick="switchSection('faculty')">
+              <i class="fa-solid fa-user-plus"></i>
+              Add Faculty
+            </button>
+            <button class="action-btn" onclick="switchSection('activities')">
+              <i class="fa-solid fa-calendar-plus"></i>
+              Add Activity
+            </button>
+            <button class="action-btn" onclick="switchSection('gallery')">
+              <i class="fa-solid fa-image"></i>
+              Upload Image
+            </button>
+            <button class="action-btn" onclick="switchSection('content')">
+              <i class="fa-solid fa-pen"></i>
+              Edit Content
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Faculty Section -->
+    <section id="facultySection" class="content-section">
+      <div class="section-header">
+        <h2>Faculty Management</h2>
+        <button class="btn-primary" id="addFacultyBtn">
+          <i class="fa-solid fa-plus"></i> Add Faculty
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="facultyTableBody">
+            <tr>
+              <td><img src="../assets/img/faculty/hod-aiml.jpg" alt="Faculty" class="table-img"></td>
+              <td>Dr. Dayanand</td>
+              <td>Head of Department</td>
+              <td>AIML</td>
+              <td>
+                <button class="btn-icon btn-edit" title="Edit">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn-icon btn-delete" title="Delete">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td><img src="../assets/img/faculty/jasmineet-kaur.jpg" alt="Faculty" class="table-img"></td>
+              <td>Dr. Jasmineet Kaur</td>
+              <td>Assistant Professor</td>
+              <td>AIML</td>
+              <td>
+                <button class="btn-icon btn-edit" title="Edit">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn-icon btn-delete" title="Delete">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Students Section -->
+    <section id="studentsSection" class="content-section">
+      <div class="section-header">
+        <h2>Student Management</h2>
+        <button class="btn-primary" id="addStudentBtn">
+          <i class="fa-solid fa-plus"></i> Add Student
+        </button>
+      </div>
+
+      <div class="card-grid">
+        <div class="info-card">
+          <h3>Upload Student Lists</h3>
+          <p>Upload PDF files for each academic year</p>
+          <button class="btn-secondary" onclick="document.getElementById('studentPdfUpload').click()">
+            <i class="fa-solid fa-file-pdf"></i> Upload PDF
+          </button>
+          <input type="file" id="studentPdfUpload" accept=".pdf" hidden>
+        </div>
+
+        <div class="info-card">
+          <h3>Manage Toppers</h3>
+          <p>Add or update top performing students</p>
+          <button class="btn-secondary" id="manageToppers">
+            <i class="fa-solid fa-star"></i> Manage Toppers
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Activities Section -->
+    <section id="activitiesSection" class="content-section">
+      <div class="section-header">
+        <h2>Activities Management</h2>
+        <button class="btn-primary" id="addActivityBtn">
+          <i class="fa-solid fa-plus"></i> Add Activity
+        </button>
+      </div>
+
+      <div class="card-grid">
+        <div class="activity-card">
+          <img src="../assets/img 3.jpeg" alt="Activity">
+          <div class="card-content">
+            <h3>Deep Learning Workshop</h3>
+            <p>Hands-on sessions on CNNs and transfer learning.</p>
+            <div class="card-actions">
+              <button class="btn-icon btn-edit">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn-icon btn-delete">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-card">
+          <img src="../assets/img.jpeg" alt="Activity">
+          <div class="card-content">
+            <h3>AI Hackathon</h3>
+            <p>48-hour challenge building end-to-end ML solutions.</p>
+            <div class="card-actions">
+              <button class="btn-icon btn-edit">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn-icon btn-delete">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Achievements Section -->
+    <section id="achievementsSection" class="content-section">
+      <div class="section-header">
+        <h2>Achievements Management</h2>
+        <button class="btn-primary" id="addAchievementBtn">
+          <i class="fa-solid fa-plus"></i> Add Achievement
+        </button>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-item">
+          <img src="../assets/img 4.jpeg" alt="Achievement">
+          <div class="gallery-overlay">
+            <button class="btn-icon btn-delete">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="gallery-item">
+          <img src="../assets/img 5.jpeg" alt="Achievement">
+          <div class="gallery-overlay">
+            <button class="btn-icon btn-delete">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallerySection" class="content-section">
+      <div class="section-header">
+        <h2>Gallery Management</h2>
+        <button class="btn-primary" id="uploadGalleryBtn">
+          <i class="fa-solid fa-upload"></i> Upload Image
+        </button>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-item">
+          <img src="../assets/img/gallery/department-photo-1.jpg" alt="Gallery">
+          <div class="gallery-overlay">
+            <button class="btn-icon btn-delete">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content Section -->
+    <section id="contentSection" class="content-section">
+      <div class="section-header">
+        <h2>Content Management</h2>
+        <button class="btn-primary" id="saveContentBtn">
+          <i class="fa-solid fa-save"></i> Save Changes
+        </button>
+      </div>
+
+      <div class="form-card">
+        <h3>About Us Section</h3>
+        <div class="form-group">
+          <label>Tagline</label>
+          <input type="text" class="form-input" value="Empowering Intelligence Through Innovation.">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-textarea" rows="4">Artificial Intelligence (AI) and Machine Learning (ML) Course is rapidly growing fields in computer science...</textarea>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3>Mission & Vision</h3>
+        <div class="form-group">
+          <label>Vision Statement</label>
+          <textarea class="form-textarea" rows="3">To be a premier center of excellence in Artificial Intelligence...</textarea>
+        </div>
+        <div class="form-group">
+          <label>Mission Statement</label>
+          <textarea class="form-textarea" rows="5">The mission of the Department of Artificial Intelligence...</textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal for Add/Edit Faculty -->
+  <div id="facultyModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Faculty Member</h3>
+        <button class="modal-close" id="closeFacultyModal">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="facultyForm">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" class="form-input" id="facultyName" required>
+          </div>
+          <div class="form-group">
+            <label>Role *</label>
+            <select class="form-input" id="facultyRole" required>
+              <option value="">Select Role</option>
+              <option value="HOD">Head of Department</option>
+              <option value="Professor">Professor</option>
+              <option value="Assistant Professor">Assistant Professor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Photo</label>
+            <input type="file" class="form-input" id="facultyPhoto" accept="image/*">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelFacultyBtn">Cancel</button>
+            <button type="submit" class="btn-primary">Save Faculty</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Add Activity -->
+  <div id="activityModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Add Activity</h3>
+        <button class="modal-close" id="closeActivityModal">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="activityForm">
+          <div class="form-group">
+            <label>Activity Title *</label>
+            <input type="text" class="form-input" id="activityTitle" required placeholder="e.g., Deep Learning Workshop">
+          </div>
+          <div class="form-group">
+            <label>Description *</label>
+            <textarea class="form-textarea" id="activityDescription" rows="3" required placeholder="Brief description of the activity"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Activity Image *</label>
+            <input type="file" class="form-input" id="activityImage" accept="image/*" required>
+            <small style="color: #666; font-size: 12px;">Recommended size: 800x600px</small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelActivityBtn">Cancel</button>
+            <button type="submit" class="btn-primary">Save Activity</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Add Achievement -->
+  <div id="achievementModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Add Achievement</h3>
+        <button class="modal-close" id="closeAchievementModal">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="achievementForm">
+          <div class="form-group">
+            <label>Achievement Title (Optional)</label>
+            <input type="text" class="form-input" id="achievementTitle" placeholder="e.g., Smart India Hackathon Winners">
+          </div>
+          <div class="form-group">
+            <label>Achievement Image *</label>
+            <input type="file" class="form-input" id="achievementImage" accept="image/*" required>
+            <small style="color: #666; font-size: 12px;">Recommended size: 600x400px</small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelAchievementBtn">Cancel</button>
+            <button type="submit" class="btn-primary">Save Achievement</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="database.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

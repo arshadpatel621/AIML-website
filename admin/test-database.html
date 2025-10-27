@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Database Connection Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-card {
+      background: white;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .status { 
+      padding: 10px; 
+      margin: 10px 0; 
+      border-radius: 4px; 
+      font-family: monospace;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #0056b3; }
+    pre { 
+      background: #f8f9fa; 
+      padding: 15px; 
+      border-radius: 4px; 
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Database Connection Test</h1>
+
+  <div class="test-card">
+    <h2>1. Supabase Connection</h2>
+    <button onclick="testConnection()">Test Connection</button>
+    <div id="connectionStatus"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>2. Check Tables</h2>
+    <button onclick="checkTables()">Check All Tables</button>
+    <div id="tablesStatus"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>3. Test Faculty Operations</h2>
+    <button onclick="testAddFaculty()">Add Test Faculty</button>
+    <button onclick="testFetchFaculty()">Fetch All Faculty</button>
+    <div id="facultyStatus"></div>
+  </div>
+
+  <div class="test-card">
+    <h2>4. Storage Buckets</h2>
+    <button onclick="checkBuckets()">Check Storage Buckets</button>
+    <div id="bucketsStatus"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <script>
+    function log(id, message, type = 'info') {
+      const el = document.getElementById(id);
+      el.innerHTML += `<div class="status ${type}">${message}</div>`;
+    }
+
+    async function testConnection() {
+      const status = document.getElementById('connectionStatus');
+      status.innerHTML = '';
+      
+      try {
+        if (!window.supabase) {
+          log('connectionStatus', '❌ Supabase client not initialized', 'error');
+          return;
+        }
+
+        log('connectionStatus', '✅ Supabase client initialized', 'success');
+        log('connectionStatus', `URL: ${window.supabase.supabaseUrl}`, 'info');
+        
+        // Test basic query
+        const { data, error } = await window.supabase
+          .from('faculty')
+          .select('count');
+        
+        if (error) {
+          log('connectionStatus', `⚠️ Query error: ${error.message}`, 'error');
+          log('connectionStatus', `Hint: ${error.hint || 'No hint available'}`, 'info');
+        } else {
+          log('connectionStatus', '✅ Successfully connected to database!', 'success');
+        }
+      } catch (err) {
+        log('connectionStatus', `❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function checkTables() {
+      const status = document.getElementById('tablesStatus');
+      status.innerHTML = '';
+      
+      const tables = ['faculty', 'activities', 'achievements', 'gallery', 'students', 'content'];
+      
+      for (const table of tables) {
+        try {
+          const { data, error, count } = await window.supabase
+            .from(table)
+            .select('*', { count: 'exact', head: true });
+          
+          if (error) {
+            log('tablesStatus', `❌ Table "${table}": ${error.message}`, 'error');
+            if (error.message.includes('relation') && error.message.includes('does not exist')) {
+              log('tablesStatus', `   → You need to create the "${table}" table. Run database-schema.sql`, 'info');
+            }
+          } else {
+            log('tablesStatus', `✅ Table "${table}": ${count || 0} rows`, 'success');
+          }
+        } catch (err) {
+          log('tablesStatus', `❌ Table "${table}": ${err.message}`, 'error');
+        }
+      }
+    }
+
+    async function testAddFaculty() {
+      const status = document.getElementById('facultyStatus');
+      status.innerHTML = '<div class="status info">Adding test faculty...</div>';
+      
+      try {
+        const testFaculty = {
+          name: 'Test Professor ' + Math.random().toString(36).substring(7),
+          role: 'Assistant Professor',
+          department: 'AIML',
+          photo_url: '../guru.jpg'
+        };
+
+        const { data, error } = await window.supabase
+          .from('faculty')
+          .insert([testFaculty])
+          .select();
+        
+        if (error) {
+          log('facultyStatus', `❌ Insert failed: ${error.message}`, 'error');
+          log('facultyStatus', `Details: ${JSON.stringify(error, null, 2)}`, 'error');
+        } else {
+          log('facultyStatus', `✅ Faculty added successfully!`, 'success');
+          log('facultyStatus', `<pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+        }
+      } catch (err) {
+        log('facultyStatus', `❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function testFetchFaculty() {
+      const status = document.getElementById('facultyStatus');
+      status.innerHTML = '<div class="status info">Fetching all faculty...</div>';
+      
+      try {
+        const { data, error } = await window.supabase
+          .from('faculty')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          log('facultyStatus', `❌ Fetch failed: ${error.message}`, 'error');
+        } else {
+          log('facultyStatus', `✅ Found ${data.length} faculty members`, 'success');
+          if (data.length > 0) {
+            log('facultyStatus', `<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+          } else {
+            log('facultyStatus', 'No faculty members in database yet', 'info');
+          }
+        }
+      } catch (err) {
+        log('facultyStatus', `❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function checkBuckets() {
+      const status = document.getElementById('bucketsStatus');
+      status.innerHTML = '<div class="status info">Checking storage buckets...</div>';
+      
+      try {
+        const { data, error } = await window.supabase.storage.listBuckets();
+        
+        if (error) {
+          log('bucketsStatus', `❌ Error: ${error.message}`, 'error');
+        } else {
+          log('bucketsStatus', `✅ Found ${data.length} buckets`, 'success');
+          
+          const requiredBuckets = ['faculty-photos', 'images', 'activity-images'];
+          
+          requiredBuckets.forEach(bucket => {
+            const exists = data.find(b => b.name === bucket);
+            if (exists) {
+              log('bucketsStatus', `✅ Bucket "${bucket}" exists`, 'success');
+            } else {
+              log('bucketsStatus', `⚠️ Bucket "${bucket}" not found - Create it in Supabase Dashboard`, 'error');
+            }
+          });
+          
+          if (data.length > 0) {
+            log('bucketsStatus', `<pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+          }
+        }
+      } catch (err) {
+        log('bucketsStatus', `❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    // Auto-run connection test on load
+    window.addEventListener('load', () => {
+      setTimeout(testConnection, 500);
+    });
+  </script>
+</body>
+</html>

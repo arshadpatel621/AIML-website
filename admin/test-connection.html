@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Connection Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-box {
+      background: white;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .success { color: green; font-weight: bold; }
+    .error { color: red; font-weight: bold; }
+    .info { color: blue; }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #45a049; }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Supabase Connection & Permission Test</h1>
+  
+  <div class="test-box">
+    <h3>Test 1: Check Supabase Connection</h3>
+    <button onclick="testConnection()">Run Test</button>
+    <div id="connectionResult"></div>
+  </div>
+
+  <div class="test-box">
+    <h3>Test 2: Check Tables Exist</h3>
+    <button onclick="testTables()">Run Test</button>
+    <div id="tablesResult"></div>
+  </div>
+
+  <div class="test-box">
+    <h3>Test 3: Try to Insert Faculty</h3>
+    <button onclick="testInsert()">Run Test</button>
+    <div id="insertResult"></div>
+  </div>
+
+  <div class="test-box">
+    <h3>Test 4: Check RLS Policies</h3>
+    <button onclick="testPolicies()">Run Test</button>
+    <div id="policiesResult"></div>
+  </div>
+
+  <div class="test-box">
+    <h3>Test 5: Check Storage Buckets</h3>
+    <button onclick="testStorage()">Run Test</button>
+    <div id="storageResult"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="database.js"></script>
+  
+  <script>
+    async function testConnection() {
+      const result = document.getElementById('connectionResult');
+      result.innerHTML = '<p class="info">Testing connection...</p>';
+      
+      try {
+        if (!window.supabase) {
+          result.innerHTML = '<p class="error">❌ Supabase client not initialized!</p>';
+          return;
+        }
+        
+        result.innerHTML = '<p class="success">✅ Supabase client is initialized</p>';
+        result.innerHTML += `<pre>URL: ${window.supabase.supabaseUrl}</pre>`;
+      } catch (error) {
+        result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+      }
+    }
+
+    async function testTables() {
+      const result = document.getElementById('tablesResult');
+      result.innerHTML = '<p class="info">Checking tables...</p>';
+      
+      try {
+        // Try to select from faculty table
+        const { data, error, count } = await window.supabase
+          .from('faculty')
+          .select('*', { count: 'exact', head: true });
+        
+        if (error) {
+          result.innerHTML = `<p class="error">❌ Faculty table error: ${error.message}</p>`;
+          result.innerHTML += `<pre>${JSON.stringify(error, null, 2)}</pre>`;
+        } else {
+          result.innerHTML = `<p class="success">✅ Faculty table exists!</p>`;
+          result.innerHTML += `<p>Current faculty count: ${count || 0}</p>`;
+        }
+      } catch (error) {
+        result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+      }
+    }
+
+    async function testInsert() {
+      const result = document.getElementById('insertResult');
+      result.innerHTML = '<p class="info">Attempting to insert test faculty...</p>';
+      
+      try {
+        const testFaculty = {
+          name: 'Test Faculty ' + Date.now(),
+          role: 'Test Role',
+          department: 'AIML',
+          photo_url: null
+        };
+        
+        console.log('Inserting:', testFaculty);
+        
+        const { data, error } = await window.supabase
+          .from('faculty')
+          .insert([testFaculty])
+          .select();
+        
+        if (error) {
+          result.innerHTML = `<p class="error">❌ Insert FAILED!</p>`;
+          result.innerHTML += `<p>Error message: ${error.message}</p>`;
+          result.innerHTML += `<pre>${JSON.stringify(error, null, 2)}</pre>`;
+          result.innerHTML += '<p><strong>Solution:</strong> You need to run <code>fix-database-policies.sql</code> in Supabase SQL Editor!</p>';
+        } else {
+          result.innerHTML = `<p class="success">✅ Insert SUCCESSFUL!</p>`;
+          result.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+          result.innerHTML += '<p>Now delete this test entry from Supabase Table Editor</p>';
+        }
+      } catch (error) {
+        result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+        result.innerHTML += `<pre>${error.stack}</pre>`;
+      }
+    }
+
+    async function testPolicies() {
+      const result = document.getElementById('policiesResult');
+      result.innerHTML = '<p class="info">Testing RLS policies...</p>';
+      
+      try {
+        // Test SELECT (should work)
+        const { data: selectData, error: selectError } = await window.supabase
+          .from('faculty')
+          .select('*')
+          .limit(1);
+        
+        // Test INSERT (will fail if policies not updated)
+        const { error: insertError } = await window.supabase
+          .from('faculty')
+          .insert([{ name: 'Policy Test', role: 'Test', department: 'AIML' }])
+          .select();
+        
+        let html = '';
+        
+        if (!selectError) {
+          html += '<p class="success">✅ SELECT permission: OK</p>';
+        } else {
+          html += `<p class="error">❌ SELECT permission: FAILED - ${selectError.message}</p>`;
+        }
+        
+        if (!insertError) {
+          html += '<p class="success">✅ INSERT permission: OK</p>';
+          html += '<p class="info">Cleaning up test data...</p>';
+          // Clean up
+          await window.supabase
+            .from('faculty')
+            .delete()
+            .eq('name', 'Policy Test');
+        } else {
+          html += `<p class="error">❌ INSERT permission: BLOCKED</p>`;
+          html += `<p>Error: ${insertError.message}</p>`;
+          html += '<p><strong>FIX REQUIRED:</strong></p>';
+          html += '<ol>';
+          html += '<li>Go to https://supabase.com/dashboard</li>';
+          html += '<li>Open SQL Editor</li>';
+          html += '<li>Run the content from <code>fix-database-policies.sql</code></li>';
+          html += '</ol>';
+        }
+        
+        result.innerHTML = html;
+      } catch (error) {
+        result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+      }
+    }
+
+    async function testStorage() {
+      const result = document.getElementById('storageResult');
+      result.innerHTML = '<p class="info">Checking storage buckets...</p>';
+      
+      try {
+        const { data: buckets, error } = await window.supabase.storage.listBuckets();
+        
+        if (error) {
+          result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+          return;
+        }
+        
+        const requiredBuckets = ['faculty-photos', 'activity-images', 'images'];
+        let html = '<p>Found buckets:</p><ul>';
+        
+        buckets.forEach(bucket => {
+          html += `<li>${bucket.name} (${bucket.public ? 'Public' : 'Private'})</li>`;
+        });
+        html += '</ul>';
+        
+        const missingBuckets = requiredBuckets.filter(
+          req => !buckets.find(b => b.name === req)
+        );
+        
+        if (missingBuckets.length > 0) {
+          html += `<p class="error">❌ Missing buckets: ${missingBuckets.join(', ')}</p>`;
+          html += '<p><strong>FIX:</strong></p>';
+          html += '<ol>';
+          html += '<li>Go to Supabase Dashboard → Storage</li>';
+          html += '<li>Create missing buckets (toggle Public ON)</li>';
+          html += '</ol>';
+        } else {
+          html += '<p class="success">✅ All required buckets exist!</p>';
+        }
+        
+        result.innerHTML = html;
+      } catch (error) {
+        result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+      }
+    }
+
+    // Auto-run connection test
+    window.onload = () => {
+      testConnection();
+    };
+  </script>
+</body>
+</html>

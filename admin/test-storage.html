@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Storage Configuration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    input[type="file"] {
+      margin: 10px 0;
+    }
+    .instructions {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🧪 Supabase Storage Test</h1>
+    
+    <div class="instructions">
+      <strong>⚠️ If tests fail:</strong>
+      <ol>
+        <li>Go to <a href="https://supabase.com/dashboard/project/nazeyrzodnnvcqwttrvr/storage/buckets" target="_blank">Storage Buckets</a></li>
+        <li>Create "faculty-photos" bucket if it doesn't exist</li>
+        <li>Make it <strong>Public</strong> (toggle on)</li>
+        <li>Or add RLS policies for authenticated users</li>
+      </ol>
+    </div>
+
+    <div class="test-section">
+      <h3>Test 1: Check Bucket Existence</h3>
+      <button onclick="testBucketExists()">Run Test</button>
+      <div id="bucket-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>Test 2: Test File Upload</h3>
+      <input type="file" id="testFile" accept="image/*">
+      <button onclick="testUpload()">Upload Test Image</button>
+      <div id="upload-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>Test 3: List Uploaded Files</h3>
+      <button onclick="listFiles()">List Files</button>
+      <div id="list-result" class="result" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    function showResult(elementId, message, type) {
+      const el = document.getElementById(elementId);
+      el.textContent = message;
+      el.className = `result ${type}`;
+      el.style.display = 'block';
+    }
+
+    async function testBucketExists() {
+      showResult('bucket-result', 'Testing...', 'info');
+      
+      try {
+        const { data, error } = await window.supabase.storage.listBuckets();
+        
+        if (error) {
+          showResult('bucket-result', `❌ Error: ${error.message}`, 'error');
+          return;
+        }
+        
+        const facultyBucket = data.find(b => b.name === 'faculty-photos');
+        
+        if (facultyBucket) {
+          showResult('bucket-result', 
+            `✅ SUCCESS: Bucket "faculty-photos" exists!\n\n` +
+            `Details:\n${JSON.stringify(facultyBucket, null, 2)}`, 
+            'success'
+          );
+        } else {
+          showResult('bucket-result', 
+            `❌ FAILED: Bucket "faculty-photos" does NOT exist!\n\n` +
+            `Available buckets:\n${data.map(b => '- ' + b.name).join('\n')}\n\n` +
+            `Please create the "faculty-photos" bucket in Supabase Dashboard.`, 
+            'error'
+          );
+        }
+      } catch (err) {
+        showResult('bucket-result', `❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function testUpload() {
+      const fileInput = document.getElementById('testFile');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        showResult('upload-result', '❌ Please select a file first!', 'error');
+        return;
+      }
+      
+      showResult('upload-result', 'Uploading...', 'info');
+      
+      try {
+        const fileName = `test-${Date.now()}.${file.name.split('.').pop()}`;
+        
+        const { data, error } = await window.supabase.storage
+          .from('faculty-photos')
+          .upload(fileName, file);
+        
+        if (error) {
+          showResult('upload-result', 
+            `❌ UPLOAD FAILED!\n\n` +
+            `Error: ${error.message}\n\n` +
+            `This means:\n` +
+            `- Bucket might not exist, OR\n` +
+            `- RLS policies are blocking uploads\n\n` +
+            `Solution:\n` +
+            `1. Make bucket public, OR\n` +
+            `2. Add proper RLS policies`, 
+            'error'
+          );
+          return;
+        }
+        
+        // Get public URL
+        const { data: urlData } = window.supabase.storage
+          .from('faculty-photos')
+          .getPublicUrl(fileName);
+        
+        showResult('upload-result', 
+          `✅ SUCCESS! File uploaded!\n\n` +
+          `File: ${fileName}\n` +
+          `Path: ${data.path}\n` +
+          `Public URL: ${urlData.publicUrl}\n\n` +
+          `Your storage is configured correctly! 🎉`, 
+          'success'
+        );
+      } catch (err) {
+        showResult('upload-result', `❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function listFiles() {
+      showResult('list-result', 'Loading...', 'info');
+      
+      try {
+        const { data, error } = await window.supabase.storage
+          .from('faculty-photos')
+          .list();
+        
+        if (error) {
+          showResult('list-result', `❌ Error: ${error.message}`, 'error');
+          return;
+        }
+        
+        if (data.length === 0) {
+          showResult('list-result', 'ℹ️ No files uploaded yet.', 'info');
+        } else {
+          showResult('list-result', 
+            `✅ Found ${data.length} file(s):\n\n` +
+            data.map(f => `- ${f.name} (${Math.round(f.metadata?.size / 1024)}KB)`).join('\n'), 
+            'success'
+          );
+        }
+      } catch (err) {
+        showResult('list-result', `❌ Error: ${err.message}`, 'error');
+      }
+    }
+
+    // Auto-run bucket check on page load
+    window.addEventListener('load', () => {
+      setTimeout(testBucketExists, 500);
+    });
+  </script>
+</body>
+</html>
