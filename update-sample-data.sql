@@ -33,7 +33,7 @@ INSERT INTO achievements (title, image_url) VALUES
 -- Insert default content
 INSERT INTO content (id, tagline, description, vision, mission) VALUES
 (1, 
- 'Empowering Intelligence Through Innovation.',
+ '💡 "Empowering Intelligence Through Innovation."',
  'Artificial Intelligence (AI) and Machine Learning (ML) Course is rapidly growing fields in computer science that are revolutionizing the way we interact with technology. AI involves creating intelligent systems that can perform tasks that typically require human-like intelligence. ML, on the other hand, is a subset of AI that involves developing algorithms and models that can learn from data and make predictions or decisions based on that learning.',
  'To be a premier center of excellence in Artificial Intelligence and Machine Learning education, fostering innovation and research to create future leaders in the field.',
  'The mission of the Department of Artificial Intelligence is to provide quality education, conduct cutting-edge research, and foster innovation in AI/ML technologies. We aim to develop skilled professionals who can contribute to society through intelligent system development.'

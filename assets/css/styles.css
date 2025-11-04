@@ -1785,28 +1785,39 @@ input:focus, textarea:focus { border-color: var(--ring); box-shadow: 0 0 0 4px r
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 16px;
   font-size: clamp(18px, 2.5vw, 28px);
   font-weight: 600;
-  margin-top: 20px;
+  margin-top: 30px;
+  opacity: 0;
+  animation: fadeInUp 1.2s ease-out 0.5s forwards;
+}
+
+.lightbulb-icon {
+  font-size: clamp(32px, 4vw, 48px);
+  display: inline-block;
+  animation: glowPulseIcon 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.6));
 }
 
 .tagline-text {
-  opacity: 0;
-  animation: fadeInTyping 2s ease-in-out 1s forwards;
+  background: linear-gradient(135deg, #1e293b, #3b82f6, #06b6d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 200%;
+  animation: gradientFlow 4s ease infinite;
+  letter-spacing: 0.5px;
 }
 
-.cursor {
-  opacity: 0;
-  animation: blink 1s infinite 3s;
-  font-weight: 300;
-  color: #e0e7ff;
+.tagline-text strong {
+  font-weight: 700;
 }
 
-@keyframes fadeInTyping {
+@keyframes fadeInUp {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   100% {
     opacity: 1;
@@ -1814,9 +1825,27 @@ input:focus, textarea:focus { border-color: var(--ring); box-shadow: 0 0 0 4px r
   }
 }
 
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+@keyframes glowPulseIcon {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(255, 193, 7, 0.6));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(255, 193, 7, 0.9));
+    transform: scale(1.1);
+  }
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .about-description {

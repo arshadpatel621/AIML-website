@@ -61,6 +61,7 @@ function switchSection(sectionName) {
   // Update page title
   const titles = {
     dashboard: 'Dashboard',
+    leaders: 'Leadership Management',
     faculty: 'Faculty Management',
     students: 'Student Management',
     activities: 'Activities Management',
@@ -351,6 +352,131 @@ achievementForm?.addEventListener('submit', async (e) => {
   }
 });
 
+// Leader Modal
+const leaderModal = document.getElementById('leaderModal');
+const addLeaderBtn = document.getElementById('addLeaderBtn');
+const closeLeaderModal = document.getElementById('closeLeaderModal');
+const cancelLeaderBtn = document.getElementById('cancelLeaderBtn');
+const leaderForm = document.getElementById('leaderForm');
+
+function openLeaderModal() {
+  leaderModal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLeaderModalFunc() {
+  leaderModal.classList.remove('show');
+  document.body.style.overflow = '';
+  leaderForm.reset();
+  delete leaderForm.dataset.editId;
+  document.getElementById('leaderModalTitle').textContent = 'Add Leader';
+}
+
+addLeaderBtn?.addEventListener('click', openLeaderModal);
+closeLeaderModal?.addEventListener('click', closeLeaderModalFunc);
+cancelLeaderBtn?.addEventListener('click', closeLeaderModalFunc);
+
+leaderModal?.addEventListener('click', (e) => {
+  if (e.target === leaderModal) {
+    closeLeaderModalFunc();
+  }
+});
+
+// Leader form submission
+leaderForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Saving...';
+  
+  try {
+    const name = document.getElementById('leaderName').value.trim();
+    const position = document.getElementById('leaderPosition').value.trim();
+    const displayOrder = parseInt(document.getElementById('leaderDisplayOrder').value);
+    const photoFile = document.getElementById('leaderPhoto').files[0];
+    
+    if (!name || !position || !displayOrder) {
+      alert('Please fill in all required fields!');
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+      return;
+    }
+    
+    let photoUrl = null;
+    const editId = leaderForm.dataset.editId;
+    
+    // Upload photo if provided or if adding new
+    if (photoFile) {
+      console.log('Uploading leader photo...');
+      const { url, error } = await uploadImage(photoFile, 'leadership-photos');
+      
+      if (error) {
+        console.error('Photo upload error:', error);
+        alert(`Error uploading photo: ${error.message || error}\n\nPlease ensure the 'leadership-photos' bucket exists and is public.`);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        return;
+      }
+      photoUrl = url;
+    } else if (!editId) {
+      alert('Please select a photo!');
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+      return;
+    }
+    
+    const leaderData = {
+      name,
+      position,
+      display_order: displayOrder
+    };
+    
+    if (photoUrl) {
+      leaderData.photo_url = photoUrl;
+    }
+    
+    if (editId) {
+      // Update existing
+      const { error } = await updateLeadership(editId, leaderData);
+      
+      if (error) {
+        console.error('Update error:', error);
+        alert(`Error updating leader: ${error.message || error}`);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        return;
+      }
+      
+      alert('Leader updated successfully!');
+    } else {
+      // Add new
+      const { error } = await addLeadership(leaderData);
+      
+      if (error) {
+        console.error('Insert error:', error);
+        alert(`Error adding leader: ${error.message || error}`);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        return;
+      }
+      
+      alert('Leader added successfully!');
+    }
+    
+    closeLeaderModalFunc();
+    await loadLeadersData();
+    
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    alert(`Unexpected error: ${err.message}`);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+});
+
 // Gallery management
 document.getElementById('uploadGalleryBtn')?.addEventListener('click', () => {
   const input = document.createElement('input');
@@ -420,16 +546,52 @@ document.addEventListener('keydown', (e) => {
     closeFacultyModalFunc();
     closeActivityModalFunc();
     closeAchievementModalFunc();
+    closeLeaderModalFunc();
   }
 });
 
 // Load data when section switches
+let currentLeadersData = [];
 let currentFacultyData = [];
 let currentActivitiesData = [];
 let currentAchievementsData = [];
 let currentGalleryData = [];
 
 // Define global functions immediately for onclick handlers
+window.editLeaderById = async function(id) {
+  console.log('Edit leader called with ID:', id);
+  
+  const leader = currentLeadersData.find(l => l.id === id);
+  
+  if (!leader) {
+    console.error('Leader not found with ID:', id);
+    alert('Leader not found!');
+    return;
+  }
+  
+  document.getElementById('leaderModalTitle').textContent = 'Edit Leader';
+  document.getElementById('leaderName').value = leader.name || '';
+  document.getElementById('leaderPosition').value = leader.position || '';
+  document.getElementById('leaderDisplayOrder').value = leader.display_order || 1;
+  
+  leaderForm.dataset.editId = id;
+  openLeaderModal();
+};
+
+window.deleteLeaderById = async function(id) {
+  if (!confirm('Are you sure you want to delete this leader?')) return;
+  
+  const { error } = await deleteLeadership(id);
+  
+  if (error) {
+    alert(`Error deleting leader: ${error.message || error}`);
+    return;
+  }
+  
+  alert('Leader deleted successfully!');
+  await loadLeadersData();
+};
+
 window.editFacultyById = async function(id) {
   console.log('Edit faculty called with ID:', id);
   console.log('Current faculty data:', currentFacultyData);
@@ -532,6 +694,9 @@ window.switchSection = async function(sectionName) {
     case 'dashboard':
       await loadDashboardStats();
       break;
+    case 'leaders':
+      await loadLeadersData();
+      break;
     case 'faculty':
       await loadFacultyData();
       break;
@@ -612,6 +777,49 @@ async function loadFacultyData() {
   }
 }
 
+// Load leaders data
+async function loadLeadersData() {
+  try {
+    const { data, error } = await fetchLeadership();
+    
+    if (error) {
+      console.error('Error fetching leaders:', error);
+      alert('Error loading leaders data. Please check console.');
+      return;
+    }
+    
+    currentLeadersData = data || [];
+    const tableBody = document.getElementById('leadersTableBody');
+    
+    if (!tableBody) return;
+    
+    if (currentLeadersData.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No leaders found. Add one to get started!</td></tr>';
+      return;
+    }
+    
+    tableBody.innerHTML = currentLeadersData.map(leader => `
+      <tr data-id="${leader.id}">
+        <td><img src="${leader.photo_url || '../guru.jpg'}" alt="Leader" class="table-img"></td>
+        <td>${leader.name}</td>
+        <td>${leader.position}</td>
+        <td>${leader.display_order}</td>
+        <td>
+          <button class="btn-icon btn-edit" title="Edit" onclick="editLeaderById('${leader.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn-icon btn-delete" title="Delete" onclick="deleteLeaderById('${leader.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+    
+    console.log('Leaders data loaded:', currentLeadersData.length, 'leaders');
+  } catch (error) {
+    console.error('Error loading leaders:', error);
+  }
+}
 
 // Load activities data
 async function loadActivitiesData() {
