@@ -269,12 +269,75 @@ async function fetchStudents() {
       .from('students')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return { data, error: null };
   } catch (error) {
     console.error('Error fetching students:', error);
     return { data: null, error };
+  }
+}
+
+async function fetchToppers() {
+  try {
+    const { data, error } = await window.supabase
+      .from('students')
+      .select('*')
+      .eq('is_topper', true)
+      .order('cgpa', { ascending: false })
+      .limit(3);
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching toppers:', error);
+    return { data: null, error };
+  }
+}
+
+async function addStudent(studentData) {
+  try {
+    const { data, error } = await window.supabase
+      .from('students')
+      .insert([studentData])
+      .select();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error adding student:', error);
+    return { data: null, error };
+  }
+}
+
+async function updateStudent(id, studentData) {
+  try {
+    const { data, error } = await window.supabase
+      .from('students')
+      .update(studentData)
+      .eq('id', id)
+      .select();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating student:', error);
+    return { data: null, error };
+  }
+}
+
+async function deleteStudent(id) {
+  try {
+    const { error } = await window.supabase
+      .from('students')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('Error deleting student:', error);
+    return { error };
   }
 }
 

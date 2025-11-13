@@ -430,3 +430,78 @@
     console.error('Error loading content:', error);
   }
 })();
+
+// Load toppers (top 3 students marked as toppers)
+(async function loadToppersData() {
+  try {
+    if (!window.supabase) {
+      console.warn('Supabase not initialized. Toppers will display static content.');
+      return;
+    }
+
+    console.log('🔄 Fetching toppers from database...');
+
+    const { data: toppersList, error } = await window.supabase
+      .from('students')
+      .select('*')
+      .eq('is_topper', true)
+      .order('cgpa', { ascending: false })
+      .limit(3);
+
+    if (error) {
+      console.error('❌ Error fetching toppers:', error);
+      console.log('📋 Using static toppers content from HTML');
+      return;
+    }
+
+    if (!toppersList || toppersList.length === 0) {
+      console.log('ℹ️ No toppers found in database. Using static toppers content from HTML.');
+      return;
+    }
+
+    console.log(`✅ Found ${toppersList.length} topper(s) in database`);
+
+    const topperTrack = document.querySelector('.topper-track');
+    if (!topperTrack) {
+      console.warn('Topper track container not found in DOM');
+      return;
+    }
+
+    // Clear existing content
+    topperTrack.innerHTML = '';
+
+    // Create topper cards from database
+    toppersList.forEach((topper, index) => {
+      const topperCard = document.createElement('div');
+      topperCard.className = 'topper-card';
+      topperCard.style.opacity = '0';
+      topperCard.style.transform = 'translateY(20px)';
+
+      // Use photo_url from database or fallback to placeholder
+      const photoUrl = topper.photo_url || 'https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=800&auto=format&fit=crop';
+
+      topperCard.innerHTML = `
+        <img src="${photoUrl}" alt="${topper.name}" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=800&auto=format&fit=crop';">
+        <div class="meta">
+          <h4>${index + 1}. ${topper.name.toUpperCase()}${topper.roll_number ? ' (' + topper.roll_number + ')' : ''}</h4>
+          <p>${topper.cgpa ? topper.cgpa.toFixed(2) : 'N/A'}</p>
+        </div>
+      `;
+
+      topperTrack.appendChild(topperCard);
+
+      // Fade-in animation with staggered delay
+      setTimeout(() => {
+        topperCard.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        topperCard.style.opacity = '1';
+        topperCard.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+
+    console.log(`✨ Successfully loaded and displayed ${toppersList.length} topper(s) from database`);
+    console.log('💡 Tip: Toppers are automatically synced from admin panel updates');
+  } catch (error) {
+    console.error('❌ Unexpected error loading toppers:', error);
+    console.log('📋 Falling back to static content from HTML');
+  }
+})();

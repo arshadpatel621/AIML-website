@@ -256,7 +256,7 @@
         </button>
       </div>
 
-      <div class="card-grid">
+      <div class="card-grid" style="margin-bottom: 30px;">
         <div class="info-card">
           <h3>Upload Student Lists</h3>
           <p>Upload PDF files for each academic year</p>
@@ -267,12 +267,33 @@
         </div>
 
         <div class="info-card">
-          <h3>Manage Toppers</h3>
-          <p>Add or update top performing students</p>
-          <button class="btn-secondary" id="manageToppers">
-            <i class="fa-solid fa-star"></i> Manage Toppers
+          <h3>Current Toppers</h3>
+          <p>View and manage top performing students</p>
+          <button class="btn-secondary" onclick="switchSection('students')">
+            <i class="fa-solid fa-star"></i> View All Students
           </button>
         </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Name</th>
+              <th>Roll Number</th>
+              <th>Year</th>
+              <th>CGPA</th>
+              <th>Topper</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTableBody">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 20px;">Loading students...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
@@ -536,6 +557,74 @@
           <div class="modal-footer">
             <button type="button" class="btn-secondary" id="cancelLeaderBtn">Cancel</button>
             <button type="submit" class="btn-primary">Save Leader</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Add/Edit Student -->
+  <div id="studentModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="studentModalTitle">Add Student</h3>
+        <button class="modal-close" id="closeStudentModal">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="studentForm">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" class="form-input" id="studentName" required placeholder="e.g., PRACHI KULKARNI">
+          </div>
+          <div class="form-group">
+            <label>Roll Number *</label>
+            <input type="text" class="form-input" id="studentRollNumber" required placeholder="e.g., 3GN23AI036">
+          </div>
+          <div class="form-group">
+            <label>Year *</label>
+            <select class="form-input" id="studentYear" required>
+              <option value="">Select Year</option>
+              <option value="1">First Year</option>
+              <option value="2">Second Year</option>
+              <option value="3">Third Year</option>
+              <option value="4">Fourth Year</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Semester</label>
+            <select class="form-input" id="studentSemester">
+              <option value="">Select Semester</option>
+              <option value="1">1st Semester</option>
+              <option value="2">2nd Semester</option>
+              <option value="3">3rd Semester</option>
+              <option value="4">4th Semester</option>
+              <option value="5">5th Semester</option>
+              <option value="6">6th Semester</option>
+              <option value="7">7th Semester</option>
+              <option value="8">8th Semester</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>CGPA *</label>
+            <input type="number" class="form-input" id="studentCGPA" required min="0" max="10" step="0.01" placeholder="e.g., 9.5">
+          </div>
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="studentIsTopper" style="width: auto; margin: 0;">
+              <span>Mark as Topper (Top 3 students shown on homepage)</span>
+            </label>
+            <small style="color: #666; font-size: 12px; display: block; margin-top: 4px;">Only students marked as toppers will appear on the website's topper section</small>
+          </div>
+          <div class="form-group">
+            <label>Photo (Optional)</label>
+            <input type="file" class="form-input" id="studentPhoto" accept="image/*">
+            <small style="color: #666; font-size: 12px;">Recommended size: 400x400px</small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelStudentBtn">Cancel</button>
+            <button type="submit" class="btn-primary">Save Student</button>
           </div>
         </form>
       </div>

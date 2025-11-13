@@ -144,13 +144,150 @@ facultyModal?.addEventListener('click', (e) => {
 
 // Note: addFacultyToTable is no longer used - faculty is added via loadFacultyData() from database
 
-// Student management
-document.getElementById('addStudentBtn')?.addEventListener('click', () => {
-  alert('Student addition form would open here. Connect to backend to implement.');
+// Student Modal
+const studentModal = document.getElementById('studentModal');
+const addStudentBtn = document.getElementById('addStudentBtn');
+const closeStudentModal = document.getElementById('closeStudentModal');
+const cancelStudentBtn = document.getElementById('cancelStudentBtn');
+const studentForm = document.getElementById('studentForm');
+
+function openStudentModal() {
+  studentModal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeStudentModalFunc() {
+  studentModal.classList.remove('show');
+  document.body.style.overflow = '';
+  studentForm.reset();
+  delete studentForm.dataset.editId;
+  document.getElementById('studentModalTitle').textContent = 'Add Student';
+}
+
+addStudentBtn?.addEventListener('click', openStudentModal);
+closeStudentModal?.addEventListener('click', closeStudentModalFunc);
+cancelStudentBtn?.addEventListener('click', closeStudentModalFunc);
+
+studentModal?.addEventListener('click', (e) => {
+  if (e.target === studentModal) {
+    closeStudentModalFunc();
+  }
 });
 
-document.getElementById('manageToppers')?.addEventListener('click', () => {
-  alert('Toppers management form would open here. Connect to backend to implement.');
+// Student form submission
+studentForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Saving...';
+
+  try {
+    const name = document.getElementById('studentName').value.trim();
+    const rollNumber = document.getElementById('studentRollNumber').value.trim();
+    const year = parseInt(document.getElementById('studentYear').value);
+    const semester = document.getElementById('studentSemester').value ? parseInt(document.getElementById('studentSemester').value) : null;
+    const cgpa = parseFloat(document.getElementById('studentCGPA').value);
+    const isTopper = document.getElementById('studentIsTopper').checked;
+    const photoFile = document.getElementById('studentPhoto').files[0];
+
+    if (!name || !rollNumber || !year || isNaN(cgpa)) {
+      alert('Please fill in all required fields!');
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+      return;
+    }
+
+    let photoUrl = null;
+    const editId = studentForm.dataset.editId;
+
+    // Upload photo if provided
+    if (photoFile) {
+      console.log('Uploading student photo...');
+      const { url, error } = await uploadImage(photoFile, 'student-photos');
+
+      if (error) {
+        console.error('Photo upload error:', error);
+        const errorMsg = error.message || error.toString();
+
+        if (errorMsg.includes('Bucket not found') || errorMsg.includes('bucket')) {
+          const proceed = confirm(
+            '⚠️ Storage bucket "student-photos" not found!\n\n' +
+            'To fix this:\n' +
+            '1. Go to Supabase Dashboard → Storage\n' +
+            '2. Create a new bucket named "student-photos"\n' +
+            '3. Make it public\n\n' +
+            'OR run the SQL file: create-student-photos-bucket.sql\n\n' +
+            'Click OK to save student WITHOUT photo, or Cancel to stop.'
+          );
+
+          if (!proceed) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return;
+          }
+        } else {
+          alert(`Error uploading photo: ${errorMsg}\n\nProceeding without photo.`);
+        }
+      } else {
+        photoUrl = url;
+        console.log('Photo uploaded successfully:', photoUrl);
+      }
+    }
+
+    const studentData = {
+      name,
+      roll_number: rollNumber,
+      year,
+      semester,
+      cgpa,
+      is_topper: isTopper
+    };
+
+    // Only add photo_url if we have one
+    if (photoUrl) {
+      studentData.photo_url = photoUrl;
+    }
+
+    if (editId) {
+      // Update existing
+      const { error } = await updateStudent(editId, studentData);
+
+      if (error) {
+        console.error('Update error:', error);
+        alert(`Error updating student: ${error.message || error}`);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        return;
+      }
+
+      alert('Student updated successfully!');
+    } else {
+      // Add new
+      const { error } = await addStudent(studentData);
+
+      if (error) {
+        console.error('Insert error:', error);
+        alert(`Error adding student: ${error.message || error}`);
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        return;
+      }
+
+      alert('Student added successfully!');
+    }
+
+    closeStudentModalFunc();
+    await loadStudentsData();
+
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    alert(`Unexpected error: ${err.message}`);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
 });
 
 document.getElementById('studentPdfUpload')?.addEventListener('change', (e) => {
@@ -547,12 +684,14 @@ document.addEventListener('keydown', (e) => {
     closeActivityModalFunc();
     closeAchievementModalFunc();
     closeLeaderModalFunc();
+    closeStudentModalFunc();
   }
 });
 
 // Load data when section switches
 let currentLeadersData = [];
 let currentFacultyData = [];
+let currentStudentsData = [];
 let currentActivitiesData = [];
 let currentAchievementsData = [];
 let currentGalleryData = [];
@@ -672,16 +811,53 @@ window.deleteAchievementById = async function(id) {
 
 window.deleteGalleryImageById = async function(id) {
   if (!confirm('Are you sure you want to delete this image?')) return;
-  
+
   const { error } = await deleteGalleryImage(id);
-  
+
   if (error) {
     alert('Error deleting image!');
     return;
   }
-  
+
   alert('Image deleted successfully!');
   await loadGalleryData();
+};
+
+window.editStudentById = async function(id) {
+  console.log('Edit student called with ID:', id);
+
+  const student = currentStudentsData.find(s => s.id === id);
+
+  if (!student) {
+    console.error('Student not found with ID:', id);
+    alert('Student not found!');
+    return;
+  }
+
+  document.getElementById('studentModalTitle').textContent = 'Edit Student';
+  document.getElementById('studentName').value = student.name || '';
+  document.getElementById('studentRollNumber').value = student.roll_number || '';
+  document.getElementById('studentYear').value = student.year || '';
+  document.getElementById('studentSemester').value = student.semester || '';
+  document.getElementById('studentCGPA').value = student.cgpa || '';
+  document.getElementById('studentIsTopper').checked = student.is_topper || false;
+
+  studentForm.dataset.editId = id;
+  openStudentModal();
+};
+
+window.deleteStudentById = async function(id) {
+  if (!confirm('Are you sure you want to delete this student?')) return;
+
+  const { error } = await deleteStudent(id);
+
+  if (error) {
+    alert(`Error deleting student: ${error.message || error}`);
+    return;
+  }
+
+  alert('Student deleted successfully!');
+  await loadStudentsData();
 };
 
 // Override switchSection to load data
@@ -699,6 +875,9 @@ window.switchSection = async function(sectionName) {
       break;
     case 'faculty':
       await loadFacultyData();
+      break;
+    case 'students':
+      await loadStudentsData();
       break;
     case 'activities':
       await loadActivitiesData();
@@ -774,6 +953,54 @@ async function loadFacultyData() {
     console.log('Faculty data loaded:', currentFacultyData.length, 'members');
   } catch (error) {
     console.error('Error loading faculty:', error);
+  }
+}
+
+// Load students data
+async function loadStudentsData() {
+  try {
+    const { data, error } = await fetchStudents();
+
+    if (error) {
+      console.error('Error fetching students:', error);
+      alert('Error loading students data. Please check console.');
+      return;
+    }
+
+    currentStudentsData = data || [];
+    const tableBody = document.getElementById('studentsTableBody');
+
+    if (!tableBody) return;
+
+    if (currentStudentsData.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No students found. Add one to get started!</td></tr>';
+      return;
+    }
+
+    tableBody.innerHTML = currentStudentsData.map(student => `
+      <tr data-id="${student.id}">
+        <td><img src="${student.photo_url || 'https://images.unsplash.com/photo-1544006659-f0b21884ce1d?q=80&w=800&auto=format&fit=crop'}" alt="Student" class="table-img"></td>
+        <td>${student.name}</td>
+        <td>${student.roll_number || 'N/A'}</td>
+        <td>Year ${student.year}</td>
+        <td>${student.cgpa ? student.cgpa.toFixed(2) : 'N/A'}</td>
+        <td>
+          ${student.is_topper ? '<span style="color: gold;"><i class="fa-solid fa-star"></i> Yes</span>' : 'No'}
+        </td>
+        <td>
+          <button class="btn-icon btn-edit" title="Edit" onclick="editStudentById('${student.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn-icon btn-delete" title="Delete" onclick="deleteStudentById('${student.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+
+    console.log('Students data loaded:', currentStudentsData.length, 'students');
+  } catch (error) {
+    console.error('Error loading students:', error);
   }
 }
 
