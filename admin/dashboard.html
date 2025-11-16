@@ -48,6 +48,10 @@
         <i class="fa-solid fa-file-lines"></i>
         <span>Content</span>
       </a>
+      <a href="#contact" class="nav-item" data-section="contact">
+        <i class="fa-solid fa-address-card"></i>
+        <span>Contact</span>
+      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -424,6 +428,74 @@
         </div>
       </div>
     </section>
+
+    <!-- Contact Section -->
+    <section id="contactSection" class="content-section">
+      <div class="section-header">
+        <h2>Contact Management</h2>
+        <div class="header-actions-group">
+          <button class="btn-secondary" id="refreshMessagesBtn" title="Refresh Messages">
+            <i class="fa-solid fa-sync-alt"></i> Refresh
+          </button>
+          <button class="btn-primary" id="saveContactInfoBtn">
+            <i class="fa-solid fa-save"></i> Save Contact Info
+          </button>
+        </div>
+      </div>
+
+      <!-- Contact Info Form -->
+      <div class="form-card" style="margin-bottom: 30px;">
+        <h3>Contact Information</h3>
+        <p style="color: #666; margin-bottom: 20px;">Manage the contact details displayed on the website.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Address *</label>
+            <textarea class="form-textarea" id="contactAddress" rows="2" required placeholder="Guru Nanak Dev Engineering College Mailoor Road, Bidar, KA-585403"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Phone *</label>
+            <input type="text" class="form-input" id="contactPhone" required placeholder="+918482-226949">
+          </div>
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" class="form-input" id="contactEmail" required placeholder="principalgndecb@gmail.com">
+          </div>
+          <div class="form-group">
+            <label>Alternate Email</label>
+            <input type="email" class="form-input" id="contactAlternateEmail" placeholder="principal@gndecb.ac.in">
+          </div>
+          <div class="form-group">
+            <label>Website</label>
+            <input type="url" class="form-input" id="contactWebsite" placeholder="https://www.gndecb.ac.in">
+          </div>
+          <div class="form-group">
+            <label>Office Hours</label>
+            <input type="text" class="form-input" id="contactOfficeHours" placeholder="Monday - Friday: 9:00 AM - 5:00 PM">
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages Section -->
+      <div class="messages-header">
+        <h3>Contact Messages</h3>
+        <div class="message-filters">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="new">New</button>
+          <button class="filter-btn" data-filter="read">Read</button>
+          <button class="filter-btn" data-filter="replied">Replied</button>
+          <button class="filter-btn" data-filter="archived">Archived</button>
+        </div>
+      </div>
+
+      <div class="messages-container" id="messagesContainer">
+        <div class="messages-list" id="messagesList">
+          <div style="text-align: center; padding: 40px; color: #666;">
+            <i class="fa-solid fa-envelope" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+            <p>Loading messages...</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- Modal for Add/Edit Faculty -->
@@ -627,6 +699,33 @@
             <button type="submit" class="btn-primary">Save Student</button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for View Message -->
+  <div id="messageModal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 id="messageModalTitle">Message Details</h3>
+        <button class="modal-close" id="closeMessageModal">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="messageDetails" class="message-details">
+          <!-- Message details will be populated here -->
+        </div>
+        <div class="form-card" style="margin-top: 20px;">
+          <h4>Admin Notes</h4>
+          <textarea class="form-textarea" id="messageAdminNotes" rows="3" placeholder="Add internal notes about this message..."></textarea>
+          <div class="message-actions" style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-secondary" id="markAsReadBtn">Mark as Read</button>
+            <button class="btn-secondary" id="markAsRepliedBtn">Mark as Replied</button>
+            <button class="btn-secondary" id="archiveMessageBtn">Archive</button>
+            <button class="btn-primary" id="saveMessageNotesBtn">Save Notes</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

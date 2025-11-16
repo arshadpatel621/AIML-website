@@ -621,20 +621,21 @@ NIKITA DANADIN
 principal@gndecb.ac.in</li>
         </ul>
       </div>
-      <form name="contact" class="contact-form" data-netlify="true">
+      <form name="contact" class="contact-form" id="contactForm">
         <input type="hidden" name="form-name" value="contact">
         <div class="form-row">
           <label>Full Name
-            <input name="name" required placeholder="Your name" />
+            <input name="name" id="contactFormName" required placeholder="Your name" />
           </label>
           <label>Email
-            <input type="email" name="email" required placeholder="you@example.com" />
+            <input type="email" name="email" id="contactFormEmail" required placeholder="you@example.com" />
           </label>
         </div>
         <label>Message
-          <textarea name="message" rows="5" required placeholder="How can we help?"></textarea>
+          <textarea name="message" id="contactFormMessageText" rows="5" required placeholder="How can we help?"></textarea>
         </label>
         <button class="btn btn-primary" type="submit">Send Message</button>
+        <div id="contactFormStatus" style="margin-top: 15px; display: none;"></div>
       </form>
     </div>
   </section>
@@ -668,5 +669,6 @@ principal@gndecb.ac.in</li>
   
   <script src="assets/js/main.js"></script>
   <script src="assets/js/faculty-loader.js"></script>
+  <script src="assets/js/contact-form.js"></script>
 </body>
 </html>

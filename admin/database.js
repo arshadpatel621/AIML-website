@@ -372,15 +372,115 @@ async function updateContent(contentData) {
   }
 }
 
+// Contact Info Operations
+async function fetchContactInfo() {
+  try {
+    const { data, error } = await window.supabase
+      .from('contact_info')
+      .select('*')
+      .single();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching contact info:', error);
+    return { data: null, error };
+  }
+}
+
+async function updateContactInfo(contactData) {
+  try {
+    const { data, error } = await window.supabase
+      .from('contact_info')
+      .upsert({ id: 1, ...contactData })
+      .select();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating contact info:', error);
+    return { data: null, error };
+  }
+}
+
+// Contact Messages Operations
+async function fetchContactMessages(filter = 'all') {
+  try {
+    let query = window.supabase
+      .from('contact_messages')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (filter !== 'all') {
+      query = query.eq('status', filter);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching contact messages:', error);
+    return { data: null, error };
+  }
+}
+
+async function addContactMessage(messageData) {
+  try {
+    const { data, error } = await window.supabase
+      .from('contact_messages')
+      .insert([messageData])
+      .select();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error adding contact message:', error);
+    return { data: null, error };
+  }
+}
+
+async function updateContactMessage(id, messageData) {
+  try {
+    const { data, error } = await window.supabase
+      .from('contact_messages')
+      .update(messageData)
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating contact message:', error);
+    return { data: null, error };
+  }
+}
+
+async function deleteContactMessage(id) {
+  try {
+    const { error } = await window.supabase
+      .from('contact_messages')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    return { error: null };
+  } catch (error) {
+    console.error('Error deleting contact message:', error);
+    return { error };
+  }
+}
+
 // Statistics
 async function fetchDashboardStats() {
   try {
-    const [facultyCount, studentsCount, activitiesCount, achievementsCount, leadershipCount] = await Promise.all([
+    const [facultyCount, studentsCount, activitiesCount, achievementsCount, leadershipCount, messagesCount] = await Promise.all([
       window.supabase.from('faculty').select('*', { count: 'exact', head: true }),
       window.supabase.from('students').select('*', { count: 'exact', head: true }),
       window.supabase.from('activities').select('*', { count: 'exact', head: true }),
       window.supabase.from('achievements').select('*', { count: 'exact', head: true }),
-      window.supabase.from('leadership').select('*', { count: 'exact', head: true })
+      window.supabase.from('leadership').select('*', { count: 'exact', head: true }),
+      window.supabase.from('contact_messages').select('*', { count: 'exact', head: true })
     ]);
 
     return {
@@ -388,7 +488,8 @@ async function fetchDashboardStats() {
       students: studentsCount.count || 0,
       activities: activitiesCount.count || 0,
       achievements: achievementsCount.count || 0,
-      leadership: leadershipCount.count || 0
+      leadership: leadershipCount.count || 0,
+      messages: messagesCount.count || 0
     };
   } catch (error) {
     console.error('Error fetching stats:', error);
@@ -397,7 +498,8 @@ async function fetchDashboardStats() {
       students: 0,
       activities: 0,
       achievements: 0,
-      leadership: 0
+      leadership: 0,
+      messages: 0
     };
   }
 }

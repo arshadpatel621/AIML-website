@@ -67,7 +67,8 @@ function switchSection(sectionName) {
     activities: 'Activities Management',
     achievements: 'Achievements Management',
     gallery: 'Gallery Management',
-    content: 'Content Management'
+    content: 'Content Management',
+    contact: 'Contact Management'
   };
   pageTitle.textContent = titles[sectionName] || 'Dashboard';
 
@@ -891,6 +892,9 @@ window.switchSection = async function(sectionName) {
     case 'content':
       await loadContentData();
       break;
+    case 'contact':
+      await loadContactData();
+      break;
   }
 };
 
@@ -1338,6 +1342,349 @@ if (saveContentBtn) {
     alert('Content saved successfully!');
   });
 }
+
+// Contact Management
+let currentContactMessages = [];
+let currentMessageFilter = 'all';
+
+// Load contact data
+async function loadContactData() {
+  await Promise.all([loadContactInfo(), loadContactMessages('all')]);
+}
+
+// Load contact info
+async function loadContactInfo() {
+  try {
+    const { data, error } = await fetchContactInfo();
+    
+    if (error) {
+      console.error('Error loading contact info:', error);
+      return;
+    }
+    
+    if (data) {
+      document.getElementById('contactAddress').value = data.address || '';
+      document.getElementById('contactPhone').value = data.phone || '';
+      document.getElementById('contactEmail').value = data.email || '';
+      document.getElementById('contactAlternateEmail').value = data.alternate_email || '';
+      document.getElementById('contactWebsite').value = data.website || '';
+      document.getElementById('contactOfficeHours').value = data.office_hours || '';
+    }
+  } catch (error) {
+    console.error('Error loading contact info:', error);
+  }
+}
+
+// Load contact messages
+async function loadContactMessages(filter = 'all') {
+  try {
+    const { data, error } = await fetchContactMessages(filter);
+    
+    if (error) {
+      console.error('Error loading messages:', error);
+      const messagesList = document.getElementById('messagesList');
+      if (messagesList) {
+        messagesList.innerHTML = '<div style="text-align: center; padding: 40px; color: #dc3545;">Error loading messages. Please check console.</div>';
+      }
+      return;
+    }
+    
+    currentContactMessages = data || [];
+    currentMessageFilter = filter;
+    renderMessages(currentContactMessages);
+    
+    // Update active filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.filter === filter) {
+        btn.classList.add('active');
+      }
+    });
+  } catch (error) {
+    console.error('Error loading messages:', error);
+  }
+}
+
+// Render messages
+function renderMessages(messages) {
+  const messagesList = document.getElementById('messagesList');
+  if (!messagesList) return;
+  
+  if (messages.length === 0) {
+    messagesList.innerHTML = `
+      <div style="text-align: center; padding: 40px; color: #666;">
+        <i class="fa-solid fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;"></i>
+        <p>No messages found.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  messagesList.innerHTML = messages.map(msg => {
+    const date = new Date(msg.created_at).toLocaleString();
+    const statusBadge = getStatusBadge(msg.status);
+    const isNew = msg.status === 'new';
+    
+    return `
+      <div class="message-item ${isNew ? 'message-new' : ''}" data-id="${msg.id}">
+        <div class="message-header">
+          <div class="message-sender">
+            <strong>${escapeHtml(msg.name)}</strong>
+            <span class="message-email">${escapeHtml(msg.email)}</span>
+          </div>
+          <div class="message-meta">
+            ${statusBadge}
+            <span class="message-date">${date}</span>
+          </div>
+        </div>
+        <div class="message-body">
+          <p>${escapeHtml(msg.message).substring(0, 150)}${msg.message.length > 150 ? '...' : ''}</p>
+        </div>
+        <div class="message-actions">
+          <button class="btn-small btn-primary" onclick="viewMessage('${msg.id}')">View</button>
+          <button class="btn-small btn-danger" onclick="deleteMessageById('${msg.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function getStatusBadge(status) {
+  const badges = {
+    'new': '<span class="status-badge status-new">New</span>',
+    'read': '<span class="status-badge status-read">Read</span>',
+    'replied': '<span class="status-badge status-replied">Replied</span>',
+    'archived': '<span class="status-badge status-archived">Archived</span>'
+  };
+  return badges[status] || badges['new'];
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// View message modal
+let currentMessageId = null;
+const messageModal = document.getElementById('messageModal');
+const closeMessageModal = document.getElementById('closeMessageModal');
+
+function openMessageModal() {
+  messageModal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMessageModalFunc() {
+  messageModal.classList.remove('show');
+  document.body.style.overflow = '';
+  currentMessageId = null;
+}
+
+window.viewMessage = async function(id) {
+  const message = currentContactMessages.find(m => m.id === id);
+  if (!message) {
+    alert('Message not found!');
+    return;
+  }
+  
+  currentMessageId = id;
+  const messageDetails = document.getElementById('messageDetails');
+  const date = new Date(message.created_at).toLocaleString();
+  const statusBadge = getStatusBadge(message.status);
+  
+  messageDetails.innerHTML = `
+    <div class="message-detail-header">
+      <div>
+        <h4>${escapeHtml(message.name)}</h4>
+        <p class="message-detail-email"><i class="fa-solid fa-envelope"></i> ${escapeHtml(message.email)}</p>
+        <p class="message-detail-date"><i class="fa-solid fa-clock"></i> ${date}</p>
+      </div>
+      <div>
+        ${statusBadge}
+      </div>
+    </div>
+    <div class="message-detail-body">
+      <h5>Message:</h5>
+      <p>${escapeHtml(message.message).replace(/\n/g, '<br>')}</p>
+    </div>
+  `;
+  
+  document.getElementById('messageAdminNotes').value = message.admin_notes || '';
+  openMessageModal();
+};
+
+closeMessageModal?.addEventListener('click', closeMessageModalFunc);
+
+messageModal?.addEventListener('click', (e) => {
+  if (e.target === messageModal) {
+    closeMessageModalFunc();
+  }
+});
+
+// Save contact info
+const saveContactInfoBtn = document.getElementById('saveContactInfoBtn');
+if (saveContactInfoBtn) {
+  saveContactInfoBtn.addEventListener('click', async () => {
+    const address = document.getElementById('contactAddress').value.trim();
+    const phone = document.getElementById('contactPhone').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
+    const alternateEmail = document.getElementById('contactAlternateEmail').value.trim();
+    const website = document.getElementById('contactWebsite').value.trim();
+    const officeHours = document.getElementById('contactOfficeHours').value.trim();
+    
+    if (!address || !phone || !email) {
+      alert('Please fill in all required fields (Address, Phone, Email)!');
+      return;
+    }
+    
+    const contactData = {
+      address,
+      phone,
+      email,
+      alternate_email: alternateEmail || null,
+      website: website || null,
+      office_hours: officeHours || null
+    };
+    
+    const submitBtn = saveContactInfoBtn;
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+    
+    try {
+      const { error } = await updateContactInfo(contactData);
+      
+      if (error) {
+        alert(`Error saving contact info: ${error.message || error}`);
+        return;
+      }
+      
+      alert('Contact info saved successfully!');
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert(`Unexpected error: ${err.message}`);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  });
+}
+
+// Refresh messages
+const refreshMessagesBtn = document.getElementById('refreshMessagesBtn');
+if (refreshMessagesBtn) {
+  refreshMessagesBtn.addEventListener('click', async () => {
+    refreshMessagesBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    await loadContactMessages(currentMessageFilter);
+    refreshMessagesBtn.innerHTML = '<i class="fa-solid fa-sync-alt"></i> Refresh';
+  });
+}
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const filter = btn.dataset.filter;
+    loadContactMessages(filter);
+  });
+});
+
+// Message status actions
+const markAsReadBtn = document.getElementById('markAsReadBtn');
+const markAsRepliedBtn = document.getElementById('markAsRepliedBtn');
+const archiveMessageBtn = document.getElementById('archiveMessageBtn');
+const saveMessageNotesBtn = document.getElementById('saveMessageNotesBtn');
+
+if (markAsReadBtn) {
+  markAsReadBtn.addEventListener('click', async () => {
+    if (!currentMessageId) return;
+    
+    const { error } = await updateContactMessage(currentMessageId, { status: 'read' });
+    if (error) {
+      alert(`Error: ${error.message || error}`);
+      return;
+    }
+    
+    alert('Message marked as read!');
+    closeMessageModalFunc();
+    await loadContactMessages(currentMessageFilter);
+  });
+}
+
+if (markAsRepliedBtn) {
+  markAsRepliedBtn.addEventListener('click', async () => {
+    if (!currentMessageId) return;
+    
+    const { error } = await updateContactMessage(currentMessageId, { 
+      status: 'replied',
+      replied_at: new Date().toISOString()
+    });
+    if (error) {
+      alert(`Error: ${error.message || error}`);
+      return;
+    }
+    
+    alert('Message marked as replied!');
+    closeMessageModalFunc();
+    await loadContactMessages(currentMessageFilter);
+  });
+}
+
+if (archiveMessageBtn) {
+  archiveMessageBtn.addEventListener('click', async () => {
+    if (!currentMessageId) return;
+    
+    if (!confirm('Are you sure you want to archive this message?')) return;
+    
+    const { error } = await updateContactMessage(currentMessageId, { status: 'archived' });
+    if (error) {
+      alert(`Error: ${error.message || error}`);
+      return;
+    }
+    
+    alert('Message archived!');
+    closeMessageModalFunc();
+    await loadContactMessages(currentMessageFilter);
+  });
+}
+
+if (saveMessageNotesBtn) {
+  saveMessageNotesBtn.addEventListener('click', async () => {
+    if (!currentMessageId) return;
+    
+    const notes = document.getElementById('messageAdminNotes').value.trim();
+    
+    const { error } = await updateContactMessage(currentMessageId, { admin_notes: notes });
+    if (error) {
+      alert(`Error: ${error.message || error}`);
+      return;
+    }
+    
+    alert('Notes saved!');
+  });
+}
+
+// Delete message
+window.deleteMessageById = async function(id) {
+  if (!confirm('Are you sure you want to delete this message?')) return;
+  
+  const { error } = await deleteContactMessage(id);
+  
+  if (error) {
+    alert(`Error deleting message: ${error.message || error}`);
+    return;
+  }
+  
+  alert('Message deleted successfully!');
+  await loadContactMessages(currentMessageFilter);
+};
+
+// Escape key to close message modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeMessageModalFunc();
+  }
+});
 
 // Initialize - Load dashboard stats on page load
 (async function init() {
